@@ -1,1 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 224 64% 33%;
+
+    --brand: 224 64% 33%;            /* #1E3A8A */
+    --brand-foreground: 0 0% 100%;
+    --accent: 40 100% 48%;           /* #F4A300 */
+    --accent-foreground: 222 47% 11%;
+    --success: 142 71% 45%;
+    --warning: 38 92% 50%;
+    --danger: 0 72% 51%;
+  }
+
+  .dark {
+    --background: 222 47% 6%;
+    --foreground: 210 40% 98%;
+    --card: 222 40% 9%;
+    --card-foreground: 210 40% 98%;
+    --muted: 222 32% 14%;
+    --muted-foreground: 215 20% 65%;
+    --border: 222 30% 18%;
+    --input: 222 30% 18%;
+    --ring: 40 100% 55%;
+
+    --brand: 224 76% 62%;
+    --brand-foreground: 222 47% 6%;
+    --accent: 40 100% 55%;
+    --accent-foreground: 222 47% 6%;
+    --success: 142 65% 50%;
+    --warning: 38 92% 55%;
+    --danger: 0 72% 58%;
+  }
+
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  ::selection { background: hsl(var(--accent) / .3); }
+
+  /* Scrollbar رفيع وأنيق */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / .3); border-radius: 999px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / .5); }
+}
+
+@layer components {
+  .skeleton {
+    @apply relative overflow-hidden bg-muted rounded-lg;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer;
+    background: linear-gradient(90deg, transparent, hsl(var(--foreground) / .06), transparent);
+  }
+  .focus-ring {
+    @apply outline-none ring-offset-2 ring-offset-background focus-visible:ring-2 focus-visible:ring-ring;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
