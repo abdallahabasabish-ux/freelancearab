@@ -1,0 +1,105 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function isAdmin() { return isSignedIn() && request.auth.token.admin == true; }
+    function isSelf(userId) { return isSignedIn() && uid() == userId; }
+
+    // ─────────── users ───────────
+    match /users/{userId} {
+      allow read:   if isSelf(userId) || isAdmin();
+      allow create: if isSelf(userId)
+                    && request.resource.data.role == "student";
+      allow update: if isSelf(userId)
+                    && request.resource.data.role == resource.data.role
+                    && request.resource.data.diff(resource.data).affectedKeys()
+                         .hasOnly(["name","photoURL","updatedAt"]);
+      allow delete: if isAdmin();
+    }
+
+    // ─────────── categories ───────────
+    match /categories/{id} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    // ─────────── courses + nested ───────────
+    match /courses/{courseId} {
+      allow read:  if resource.data.status == "published" || isAdmin();
+      allow write: if isAdmin();
+
+      match /sections/{sectionId} {
+        allow read:  if get(/databases/$(database)/documents/courses/$(courseId)).data.status == "published" || isAdmin();
+        allow write: if isAdmin();
+
+        match /lessons/{lessonId} {
+          allow read:  if get(/databases/$(database)/documents/courses/$(courseId)).data.status == "published" || isAdmin();
+          allow write: if isAdmin();
+        }
+      }
+    }
+
+    // ─────────── quizzes ───────────
+    match /quizzes/{id} {
+      // العميل لا يقرأ الحلول — التصحيح على السيرفر
+      allow read:  if isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // ─────────── enrollments ───────────
+    match /enrollments/{id} {
+      allow read:   if isAdmin() || (isSignedIn() && resource.data.studentId == uid());
+      allow create: if isSignedIn()
+                    && request.resource.data.studentId == uid()
+                    && request.resource.data.progress == 0
+                    && request.resource.data.status == "active";
+      allow update: if isAdmin()
+                    || (isSignedIn()
+                        && resource.data.studentId == uid()
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                             .hasOnly(["progress","lastLessonId","completedAt","status"]));
+      allow delete: if isAdmin();
+    }
+
+    // ─────────── progress ───────────
+    match /progress/{id} {
+      allow read:   if isAdmin() || (isSignedIn() && resource.data.studentId == uid());
+      allow create: if isSignedIn() && request.resource.data.studentId == uid();
+      allow update: if isSignedIn() && resource.data.studentId == uid();
+      allow delete: if isAdmin();
+    }
+
+    // ─────────── reviews ───────────
+    match /reviews/{id} {
+      allow read:   if resource.data.status == "visible" || isAdmin();
+      allow create: if isSignedIn() && request.resource.data.studentId == uid();
+      allow update: if isAdmin();
+      allow delete: if isAdmin() || (isSignedIn() && resource.data.studentId == uid());
+    }
+
+    // ─────────── certificates ───────────
+    match /certificates/{id} {
+      allow read:  if true;      // تحقق عام
+      allow write: if false;     // فقط عبر Admin SDK / Server Actions
+    }
+
+    // ─────────── enrollmentRequests ───────────
+    match /enrollmentRequests/{id} {
+      allow read:   if isAdmin() || (isSignedIn() && resource.data.studentId == uid());
+      allow create: if isSignedIn() && request.resource.data.studentId == uid()
+                    && request.resource.data.status == "pending";
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ─────────── stats ───────────
+    match /stats/{docId} {
+      allow read:  if true;
+      allow write: if false;     // فقط Admin SDK
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
