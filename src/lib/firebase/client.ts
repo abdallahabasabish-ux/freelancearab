@@ -5,14 +5,13 @@ import { getFirestore, initializeFirestore, persistentLocalCache, persistentMult
 import { getStorage } from "firebase/storage";
 
 const config = {
-  apiKey: process.env.NEXT_PUBLIC_FB_API_KEY!,
-  authDomain: process.env.NEXT_PUBLIC_FB_AUTH_DOMAIN!,
-  projectId: process.env.NEXT_PUBLIC_FB_PROJECT_ID!,
-  storageBucket: process.env.NEXT_PUBLIC_FB_STORAGE_BUCKET!,
-  messagingSenderId: process.env.NEXT_PUBLIC_FB_SENDER_ID!,
-  appId: process.env.NEXT_PUBLIC_FB_APP_ID!,
+  apiKey: "AIzaSyD8q05OB-2URf_5z59UD0NBKoA3NXaxncs",
+  authDomain: "academy-os-314c0.firebaseapp.com",
+  projectId: "academy-os-314c0",
+  storageBucket: "academy-os-314c0.firebasestorage.app",
+  messagingSenderId: "790267436938",
+  appId: "1:790267436938:web:bcbace45e788569cc5b273",
 };
-
 const app = getApps().length ? getApp() : initializeApp(config);
 
 // Offline cache — يقلل القراءات ويُحسّن التجربة
