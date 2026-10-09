@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الكورسات | لوحة الإدارة</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+  <header class="site-header admin-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/admin/index.html" class="brand">
+        <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+        <span class="brand-name">لوحة <b>الإدارة</b></span>
+        <span class="admin-tag">ADMIN</span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="تنقل الإدارة">
+        <a href="/admin/index.html" class="nav-link">نظرة عامة</a>
+        <a href="/admin/courses-manage.html" class="nav-link active">الكورسات</a>
+        <a href="/admin/students-manage.html" class="nav-link">الطلاب</a>
+        <a href="/" class="nav-link">الموقع</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <button class="icon-btn" data-logout aria-label="تسجيل الخروج" title="تسجيل الخروج">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-log-out"></use></svg>
+        </button>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-page">
+    <div class="container">
+
+      <div id="adminSkeleton">
+        <div class="skeleton" style="height:64px; border-radius:var(--radius); margin-bottom:1rem;"></div>
+        <div class="skeleton" style="height:90px; border-radius:var(--radius);"></div>
+        <div class="skeleton" style="height:90px; border-radius:var(--radius); margin-top:.75rem;"></div>
+      </div>
+
+      <div class="admin-error" id="deniedState" hidden>
+        <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-lock"></use></svg>
+        <h2>هذه الصفحة للإدارة فقط</h2>
+        <a href="/" class="btn btn-primary">العودة للموقع</a>
+      </div>
+
+      <div id="adminContent" hidden>
+
+        <!-- ============ عرض القائمة ============ -->
+        <div id="listView">
+          <div class="admin-page-head">
+            <div>
+              <h1>إدارة الكورسات</h1>
+              <p>أضف وحرّر الكورسات — بنشرها تظهر فوراً للطلاب.</p>
+            </div>
+            <button type="button" class="btn btn-accent" id="newCourseBtn">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-plus"></use></svg>
+              كورس جديد
+            </button>
+          </div>
+
+          <div class="rows-stack" id="coursesList"></div>
+
+          <div class="admin-empty" id="coursesEmpty" hidden>
+            <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg>
+            <h3>لا توجد كورسات بعد</h3>
+            <p>أنشئ أول كورس للمنصة وابدأ بنشر المحتوى.</p>
+            <button type="button" class="btn btn-accent" id="newCourseBtn2">إنشاء أول كورس</button>
+          </div>
+        </div>
+
+        <!-- ============ عرض المحرر ============ -->
+        <div id="editorView" hidden>
+          <div class="admin-page-head">
+            <div>
+              <h1 id="editorTitle">كورس جديد</h1>
+              <p id="editorSub">املأ البيانات وأضف الفصول والدروس ثم احفظ.</p>
+            </div>
+            <button type="button" class="btn btn-ghost" id="backToList">
+              <svg class="icon icon-flip" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-arrow-left"></use></svg>
+              رجوع للقائمة
+            </button>
+          </div>
+
+          <form class="card editor-form" id="courseForm" novalidate>
+
+            <h2 class="form-section-title">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-edit"></use></svg>
+              البيانات الأساسية
+            </h2>
+
+            <div class="field">
+              <label class="label" for="fTitle">عنوان الكورس <span class="req">*</span></label>
+              <input type="text" id="fTitle" class="input" placeholder="مثال: أساسيات التصميم الاحترافي" required>
+            </div>
+
+            <div class="field">
+              <label class="label" for="fShortDesc">وصف مختصر (يظهر في البطاقات ونتائج البحث)</label>
+              <input type="text" id="fShortDesc" class="input" maxlength="160" placeholder="سطر واحد جاذب يلخص الكورس">
+            </div>
+
+            <div class="field">
+              <label class="label" for="fDesc">الوصف الكامل (سطر فارغ = فقرة جديدة)</label>
+              <textarea id="fDesc" class="textarea" rows="5" placeholder="اشرح ماذا سيتعلم الطالب..."></textarea>
+            </div>
+
+            <div class="form-grid">
+              <div class="field">
+                <label class="label" for="fLevel">المستوى</label>
+                <select id="fLevel" class="select">
+                  <option value="beginner">مبتدئ</option>
+                  <option value="intermediate">متوسط</option>
+                  <option value="advanced">متقدم</option>
+                </select>
+              </div>
+              <div class="field">
+                <label class="label" for="fCategory">التصنيف</label>
+                <input type="text" id="fCategory" class="input" placeholder="مثال: تصميم / برمجة / تسويق">
+              </div>
+              <div class="field">
+                <label class="label" for="fInstructor">اسم المدرّب</label>
+                <input type="text" id="fInstructor" class="input" placeholder="اختياري">
+              </div>
+              <div class="field">
+                <label class="label" for="fHours">عدد الساعات التقريبي</label>
+                <input type="number" id="fHours" class="input" min="0" step="0.5" placeholder="مثال: 4">
+              </div>
+            </div>
+
+            <div class="field">
+              <label class="label" for="fThumb">رابط صورة الغلاف (اختياري)</label>
+              <input type="url" id="fThumb" class="input" dir="ltr" placeholder="https://... — يُشتق تلقائياً من فيديو الإعلان إن تُرك فارغاً">
+            </div>
+
+            <div class="field">
+              <label class="label" for="fPromo">رابط فيديو الإعلان على يوتيوب (اختياري)</label>
+              <input type="url" id="fPromo" class="input" dir="ltr" placeholder="https://www.youtube.com/watch?v=...">
+            </div>
+
+            <div class="field" style="max-width:260px;">
+              <label class="label" for="fStatus">حالة النشر</label>
+              <select id="fStatus" class="select">
+                <option value="draft">مسودة (لا يراها الطلاب)</option>
+                <option value="published">منشور</option>
+              </select>
+            </div>
+
+            <h2 class="form-section-title">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-play-circle"></use></svg>
+              الفصول والدروس
+            </h2>
+            <p class="form-hint">لكل درس: عنوان ومدة بالدقائق. اضغط السهم لفتح تفاصيل الفيديو والوصف والمرفقات. النقاط تُمنح تلقائياً عند إتمام كل درس.</p>
+
+            <div id="modulesWrap"></div>
+
+            <button type="button" class="btn btn-outline" id="addModuleBtn">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-plus"></use></svg>
+              إضافة فصل
+            </button>
+
+            <div class="editor-actions">
+              <button type="submit" class="btn btn-primary btn-lg" id="saveBtn">
+                <span class="spinner" aria-hidden="true"></span>
+                حفظ الكورس
+              </button>
+              <button type="button" class="btn btn-ghost" id="cancelEdit">إلغاء</button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- تأكيد الحذف -->
+  <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true">
+    <div class="modal">
+      <h3 id="confirmTitle" style="margin-bottom:.5rem;"></h3>
+      <p style="color:var(--text-2); font-size:.92rem;" id="confirmText"></p>
+      <div style="display:flex; gap:.6rem; justify-content:flex-end; margin-top:1.4rem;">
+        <button type="button" class="btn btn-ghost" data-close-modal>إلغاء</button>
+        <button type="button" class="btn btn-danger" id="confirmYes">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+  <script type="module" src="/assets/js/admin-courses.js"></script>
+</body>
+</html>
