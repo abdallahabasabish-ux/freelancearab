@@ -1,18 +1,18 @@
 /* style.css */
 :root {
-    /* الألوان الأساسية */
-    --primary-color: #1e3a8a; /* الأزرق الغامق */
-    --secondary-color: #fe8a02; /* البرتقالي */
-    --bg-color: #f9fafb; /* لون الخلفية الفاتح */
-    --surface-color: #ffffff; /* لون الكروت */
-    --text-color: #111827; /* لون النص الأساسي */
-    --text-muted: #6b7280; /* لون النص الفرعي */
+    --primary-color: #1e3a8a;
+    --secondary-color: #fe8a02;
+    --bg-color: #f9fafb;
+    --surface-color: #ffffff;
+    --text-color: #111827;
+    --text-muted: #6b7280;
     --border-color: #e5e7eb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
 }
 
-/* الوضع الليلي */
 [data-theme="dark"] {
-    --primary-color: #3b82f6; /* أزرق أفتح قليلاً ليناسب الخلفية الداكنة */
+    --primary-color: #3b82f6;
     --secondary-color: #fe8a02;
     --bg-color: #111827;
     --surface-color: #1f2937;
@@ -21,89 +21,79 @@
     --border-color: #374151;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
-    direction: rtl; /* دعم اللغة العربية */
+    direction: rtl;
     transition: background-color 0.3s ease, color 0.3s ease;
     line-height: 1.6;
 }
 
-/* التنسيقات العامة */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1rem;
-}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
 
 header {
     background-color: var(--surface-color);
     border-bottom: 1px solid var(--border-color);
     padding: 1rem 0;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    color: var(--primary-color);
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-decoration: none;
-}
+.nav-container { display: flex; justify-content: space-between; align-items: center; }
+.logo { color: var(--primary-color); font-size: 1.5rem; font-weight: bold; text-decoration: none; }
 
 .btn {
-    display: inline-block;
-    padding: 0.6rem 1.2rem;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s ease;
-    text-decoration: none;
+    display: inline-block; padding: 0.6rem 1.2rem; border-radius: 6px; font-weight: bold;
+    cursor: pointer; border: none; text-decoration: none; text-align: center; transition: 0.2s;
 }
+.btn-primary { background-color: var(--primary-color); color: #fff; }
+.btn-secondary { background-color: var(--secondary-color); color: #fff; }
+.btn-danger { background-color: var(--danger-color); color: #fff; }
+.btn:hover { opacity: 0.9; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-.btn-primary {
-    background-color: var(--primary-color);
-    color: #fff;
-}
-
-.btn-primary:hover {
-    opacity: 0.9;
-}
-
-.btn-secondary {
-    background-color: var(--secondary-color);
-    color: #fff;
-}
-
-.btn-secondary:hover {
-    opacity: 0.9;
-}
-
-/* الحقول والنماذج */
+/* حقول الإدخال */
 input, select, textarea {
-    width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid var(--border-color);
+    border-radius: 6px; background-color: var(--bg-color); color: var(--text-color); outline: none;
 }
+input:focus, textarea:focus { border-color: var(--primary-color); }
 
-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
+/* شبكات العرض (Grid) */
+.grid-container { display: grid; gap: 1.5rem; }
+.grid-courses { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); margin-top: 2rem; }
+
+/* كروت (Cards) */
+.card {
+    background-color: var(--surface-color); border: 1px solid var(--border-color);
+    border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
+.course-card { transition: transform 0.2s; }
+.course-card:hover { transform: translateY(-5px); }
+.course-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 1rem; }
+.course-card h3 { color: var(--primary-color); margin-bottom: 0.5rem; }
+.course-card p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* صفحة الدرس */
+.lesson-layout { display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 2rem; }
+.main-content { flex: 3; min-width: 300px; }
+.sidebar { flex: 1; min-width: 250px; align-self: start; }
+.video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; margin-bottom: 1rem; background-color: #000; }
+.video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border:none;}
+.lesson-list { list-style: none; }
+.lesson-item { padding: 0.8rem; border-bottom: 1px solid var(--border-color); cursor: pointer; display: flex; justify-content: space-between; }
+.lesson-item:hover { background-color: var(--bg-color); }
+.lesson-item.active { border-right: 4px solid var(--primary-color); background-color: var(--bg-color); font-weight: bold; }
+
+/* الإشعارات */
+.alert { padding: 1rem; border-radius: 6px; margin-bottom: 1rem; display: none; }
+.alert-success { background-color: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px solid var(--success-color); }
+.alert-error { background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid var(--danger-color); }
+
+/* لوحة التحكم */
+.admin-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.admin-table th, .admin-table td { padding: 1rem; text-align: right; border-bottom: 1px solid var(--border-color); }
+.admin-table th { background-color: var(--bg-color); color: var(--primary-color); }
