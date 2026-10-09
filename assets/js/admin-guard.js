@@ -8,13 +8,15 @@ import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase
 import { requireAuth, initHeaderAuth } from './auth.js';
 
 export async function requireAdmin() {
-  const ctx = await requireAuth(); /* مصادقة + جلسة + ملف مكتمل */
+  const ctx = await requireAuth({ allowIncomplete: true }); /* المصادقة والبريد مطلوبان، لا يلزم ملف طالب للمدير */
   if (!ctx) return null;
 
   let isAdmin = false;
   try {
     isAdmin = (await getDoc(doc(db, 'admins', ctx.user.uid))).exists();
-  } catch { /* تجاهل */ }
+  } catch (err) {
+    console.error('تعذر التحقق من صلاحية المدير:', err);
+  }
 
   if (!isAdmin) {
     const sk = document.getElementById('adminSkeleton');
