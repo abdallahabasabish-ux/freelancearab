@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFunctions } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCCwf3A43r0K_fiYH0tVlent_DgV9zMo54",
@@ -22,5 +23,8 @@ googleProvider.setCustomParameters({ prompt: 'select_account' });
 
 /* قاعدة البيانات */
 export const db = getFirestore(app);
+
+/* وظائف الاختبارات الخادمية */
+export const functions = getFunctions(app, 'us-central1');
 
 export default app;

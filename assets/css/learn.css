@@ -142,6 +142,25 @@
 .attachment .icon:first-child { color: var(--primary-ink); }
 .attachment .dl { margin-inline-start: auto; color: var(--text-3); }
 
+/* ---------- اختبار الحلقة ---------- */
+.lesson-quiz { margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px dashed var(--border); }
+.quiz-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; }
+.quiz-heading h2 { font-size: 1.1rem; }
+.quiz-heading p { color: var(--text-2); font-size: .82rem; }
+.quiz-heading > .icon { color: var(--accent); }
+.lesson-quiz-questions { display: grid; gap: .8rem; }
+.lesson-quiz .quiz-question { min-width: 0; padding: 1rem; border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.lesson-quiz .quiz-question legend { max-width: 100%; padding-inline: .25rem; font-weight: 800; font-size: .92rem; }
+.quiz-answer-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; }
+.quiz-option { min-width: 0; display: flex; align-items: flex-start; gap: .55rem; padding: .65rem .75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+.quiz-option:has(input:checked) { border-color: var(--primary); background: var(--primary-soft); }
+.quiz-option input { flex: 0 0 auto; margin-top: .25rem; accent-color: var(--primary); }
+.quiz-option span { overflow-wrap: anywhere; }
+.lesson-quiz #submitLessonQuiz { margin-top: 1rem; }
+.quiz-result { margin-top: 1rem; padding: .9rem 1rem; border-radius: var(--radius-sm); font-weight: 800; }
+.quiz-result.passed { color: var(--success); background: var(--success-soft); }
+.quiz-result.failed { color: var(--danger); background: var(--danger-soft); }
+
 /* أزرار التنقل والإتمام */
 .lesson-actions {
   display: flex; gap: .7rem; flex-wrap: wrap;
@@ -369,4 +388,8 @@
   .continue-card { flex-direction: column; align-items: stretch; }
   .continue-card .c-thumb { width: 100%; }
   .c-body .btn { align-self: stretch; }
+}
+
+@media (max-width: 575px) {
+  .quiz-answer-options { grid-template-columns: 1fr; }
 }

@@ -28,7 +28,26 @@ const S = {
 
 const newId    = () => crypto.randomUUID();
 const newModule = () => ({ _id: newId(), title: '', lessons: [] });
-const newLesson = () => ({ _id: newId(), title: '', durationMin: '', videoURL: '', description: '', attachments: [] });
+const newLesson = () => ({ _id: newId(), title: '', durationMin: '', videoURL: '', description: '', attachments: [], quizQuestions: defaultQuizQuestions() });
+
+function defaultQuizQuestions() {
+  return Array.from({ length: 4 }, (_, index) => {
+    const type = index < 2 ? 'choice' : 'boolean';
+    const options = type === 'boolean'
+      ? [{ id: 'true', text: 'صح' }, { id: 'false', text: 'خطأ' }]
+      : Array.from({ length: 4 }, (_, optionIndex) => ({ id: `option-${optionIndex + 1}`, text: '' }));
+    return { id: newId(), type, prompt: '', options, correctOptionId: '' };
+  });
+}
+
+function isQuizComplete(questions = []) {
+  return questions.length === 4 && questions.every((question) =>
+    typeof question.prompt === 'string' && question.prompt.trim() &&
+    Array.isArray(question.options) && question.options.length >= 2 &&
+    question.options.every((option) => typeof option.text === 'string' && option.text.trim()) &&
+    question.options.some((option) => option.id === question.correctOptionId)
+  );
+}
 
 async function init() {
   $('#newCourseBtn').addEventListener('click', () => openEditor(null));
@@ -132,6 +151,18 @@ async function openEditor(courseId) {
       /* محتوى الدروس من subcollection */
       const ls = await getDocs(collection(db, 'courses', courseId, 'lessons'));
       const byId = new Map(ls.docs.map((d) => [d.id, d.data()]));
+      const quizRows = await Promise.all(ls.docs.map(async (lessonDoc) => {
+        const quizRef = doc(db, 'courses', courseId, 'lessons', lessonDoc.id, 'quiz', 'current');
+        const keysRef = doc(db, 'courses', courseId, 'lessons', lessonDoc.id, 'answerKeys', 'current');
+        const [quizSnap, keysSnap] = await Promise.all([getDoc(quizRef), getDoc(keysRef)]);
+        const quizQuestions = quizSnap.exists() ? quizSnap.data().questions || [] : [];
+        const correctAnswers = keysSnap.exists() ? keysSnap.data().correctByQuestionId || {} : {};
+        return [lessonDoc.id, quizQuestions.map((question) => ({
+          ...question,
+          correctOptionId: correctAnswers[question.id] || ''
+        }))];
+      }));
+      const quizById = new Map(quizRows);
 
       S.modules = (c.outline || []).map((m) => ({
         _id: m.id || newId(),
@@ -144,7 +175,8 @@ async function openEditor(courseId) {
             durationMin: (l.durationSec ?? full.durationSec ?? 0) / 60 || '',
             videoURL: full.videoURL || (full.videoId ? `https://youtu.be/${full.videoId}` : ''),
             description: full.description || '',
-            attachments: (full.attachments || []).map((a) => ({ title: a.title || '', url: a.url || '' }))
+            attachments: (full.attachments || []).map((a) => ({ title: a.title || '', url: a.url || '' })),
+            quizQuestions: quizById.get(l.id) || []
           };
         })
       }));
@@ -222,6 +254,37 @@ function lessonHTML(l, mi, li) {
           إضافة مرفق
         </button>
       </div>
+      <div class="quiz-editor">
+        <div class="quiz-editor-head">
+          <strong>اختبار الحلقة · سؤالان اختيار وسؤالان صح/خطأ · النجاح من 50%</strong>
+          ${l.quizQuestions?.length ? '' : `<button type="button" class="btn btn-outline btn-sm" data-act="add-quiz" data-m="${mi}" data-l="${li}">إنشاء الاختبار</button>`}
+        </div>
+        ${(l.quizQuestions || []).map((question, qi) => quizQuestionHTML(question, mi, li, qi)).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function quizQuestionHTML(question, mi, li, qi) {
+  const isBoolean = question.type === 'boolean';
+  return `
+  <div class="quiz-question">
+    <label class="label" for="quiz-${mi}-${li}-${qi}">السؤال ${qi + 1}</label>
+    <textarea class="textarea" id="quiz-${mi}-${li}-${qi}" rows="2" data-f="quiz-prompt" data-m="${mi}" data-l="${li}" data-q="${qi}" placeholder="اكتب نص السؤال">${esc(question.prompt || '')}</textarea>
+    <div class="quiz-question-type">
+      <select class="select" data-f="quiz-type" data-m="${mi}" data-l="${li}" data-q="${qi}" aria-label="نوع السؤال">
+        <option value="choice" ${!isBoolean ? 'selected' : ''}>اختيار من متعدد</option>
+        <option value="boolean" ${isBoolean ? 'selected' : ''}>صح أو خطأ</option>
+      </select>
+      <select class="select" data-f="quiz-correct" data-m="${mi}" data-l="${li}" data-q="${qi}" aria-label="الإجابة الصحيحة">
+        <option value="">اختر الإجابة الصحيحة</option>
+        ${(question.options || []).map((option) => `<option value="${esc(option.id)}" ${question.correctOptionId === option.id ? 'selected' : ''}>${esc(option.text || `خيار ${option.id.split('-').pop()}`)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="quiz-options">
+      ${(question.options || []).map((option, oi) => isBoolean
+        ? `<span class="quiz-boolean-option">${esc(option.text)}</span>`
+        : `<input class="input" data-f="quiz-option" data-m="${mi}" data-l="${li}" data-q="${qi}" data-o="${oi}" value="${esc(option.text)}" placeholder="الخيار ${oi + 1}">`).join('')}
     </div>
   </div>`;
 }
@@ -254,6 +317,7 @@ function bindBuilderEvents() {
     else if (act === 'del-module')   { S.modules.splice(mi, 1); renderBuilder(); }
     else if (act === 'add-att')      { S.modules[mi].lessons[li].attachments.push({ title: '', url: '' }); renderBuilder(); }
     else if (act === 'del-att')      { S.modules[mi].lessons[li].attachments.splice(ai, 1); renderBuilder(); }
+    else if (act === 'add-quiz')     { S.modules[mi].lessons[li].quizQuestions = defaultQuizQuestions(); renderBuilder(); }
     else if (act === 'toggle-extra') {
       const card = btn.closest('.lesson-card');
       const extra = card.querySelector('.lesson-extra');
@@ -263,13 +327,14 @@ function bindBuilderEvents() {
   });
 
   /* تحديث الحالة دون إعادة رسم (لا فقدان تركيز) */
-  wrap.addEventListener('input', (e) => {
+  const updateField = (e) => {
     const el = e.target;
     const f = el.dataset.f;
     if (!f) return;
     const mi = +el.dataset.m;
     const li = el.dataset.l !== undefined ? +el.dataset.l : null;
     const ai = el.dataset.a !== undefined ? +el.dataset.a : null;
+    const qi = el.dataset.q !== undefined ? +el.dataset.q : null;
 
     if (f === 'mtitle')        S.modules[mi].title = el.value;
     else if (f === 'ltitle')   S.modules[mi].lessons[li].title = el.value;
@@ -278,7 +343,21 @@ function bindBuilderEvents() {
     else if (f === 'ldesc')    S.modules[mi].lessons[li].description = el.value;
     else if (f === 'att-title') S.modules[mi].lessons[li].attachments[ai].title = el.value;
     else if (f === 'att-url')   S.modules[mi].lessons[li].attachments[ai].url = el.value;
-  });
+    else if (f === 'quiz-prompt') S.modules[mi].lessons[li].quizQuestions[qi].prompt = el.value;
+    else if (f === 'quiz-option') S.modules[mi].lessons[li].quizQuestions[qi].options[+el.dataset.o].text = el.value;
+    else if (f === 'quiz-correct') S.modules[mi].lessons[li].quizQuestions[qi].correctOptionId = el.value;
+    else if (f === 'quiz-type') {
+      const question = S.modules[mi].lessons[li].quizQuestions[qi];
+      question.type = el.value;
+      question.options = el.value === 'boolean'
+        ? [{ id: 'true', text: 'صح' }, { id: 'false', text: 'خطأ' }]
+        : Array.from({ length: 4 }, (_, index) => ({ id: `option-${index + 1}`, text: '' }));
+      question.correctOptionId = '';
+      renderBuilder();
+    }
+  };
+  wrap.addEventListener('input', updateField);
+  wrap.addEventListener('change', updateField);
 }
 
 /* ==================== الحفظ ==================== */
@@ -288,6 +367,11 @@ async function saveCourse() {
   if (!title) { toast('عنوان الكورس مطلوب.', 'warning'); $('#fTitle').focus(); return; }
 
   const status = $('#fStatus').value;
+  const lessonsWithQuizzes = S.modules.flatMap((module) => module.lessons)
+    .filter((lesson) => lesson.quizQuestions?.length);
+  if (status === 'published' && lessonsWithQuizzes.some((lesson) => !isQuizComplete(lesson.quizQuestions))) {
+    return toast('أكمل الأسئلة الأربعة وحدد الإجابة الصحيحة لكل سؤال قبل النشر.', 'warning');
+  }
   const outline = S.modules.map((m, mi) => ({
     id: m._id,
     title: m.title.trim() || `الفصل ${mi + 1}`,
@@ -349,6 +433,35 @@ async function saveCourse() {
           isPublished: status === 'published',
           updatedAt: serverTimestamp()
         }, { merge: true });
+
+        const questions = l.quizQuestions || [];
+        const quizRef = doc(db, 'courses', S.courseId, 'lessons', l._id, 'quiz', 'current');
+        const keysRef = doc(db, 'courses', S.courseId, 'lessons', l._id, 'answerKeys', 'current');
+        if (questions.length) {
+          const version = newId();
+          const complete = isQuizComplete(questions);
+          batch.set(quizRef, {
+            version,
+            enabled: status === 'published' && complete,
+            passPercent: 50,
+            questions: questions.map((question) => ({
+              id: question.id,
+              type: question.type,
+              prompt: question.prompt.trim(),
+              options: question.options.map((option) => ({ id: option.id, text: option.text.trim() }))
+            })),
+            updatedAt: serverTimestamp()
+          });
+          batch.set(keysRef, {
+            version,
+            correctByQuestionId: Object.fromEntries(questions
+              .filter((question) => question.correctOptionId)
+              .map((question) => [question.id, question.correctOptionId]))
+          });
+        } else {
+          batch.delete(quizRef);
+          batch.delete(keysRef);
+        }
       });
     });
     await batch.commit();

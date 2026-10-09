@@ -131,6 +131,21 @@
               <div id="attachmentsList"></div>
             </section>
 
+            <section class="lesson-quiz" id="lessonQuizSection" hidden aria-labelledby="lessonQuizTitle">
+              <div class="quiz-heading">
+                <div>
+                  <h2 id="lessonQuizTitle">اختبار الحلقة</h2>
+                  <p>4 أسئلة · النجاح من إجابتين صحيحتين · محاولة واحدة</p>
+                </div>
+                <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+              </div>
+              <form id="lessonQuizForm">
+                <div class="lesson-quiz-questions" id="lessonQuizQuestions"></div>
+                <button type="submit" class="btn btn-accent" id="submitLessonQuiz">تسليم الإجابات</button>
+              </form>
+              <div class="quiz-result" id="lessonQuizResult" role="status" hidden></div>
+            </section>
+
             <div class="lesson-actions">
               <button type="button" class="btn btn-ghost" id="prevBtn">
                 <svg class="icon icon-flip" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-arrow-left"></use></svg>

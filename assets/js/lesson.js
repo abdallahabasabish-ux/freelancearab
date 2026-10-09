@@ -3,7 +3,8 @@
    مشغل يوتيوب (IFrame API) + ملاحظات زمنية + تقدم + نقاط
    ============================================================ */
 
-import { db } from './firebase-config.js';
+import { db, functions } from './firebase-config.js';
+import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { requireAuth, initHeaderAuth } from './auth.js';
 import { fetchCourseById, escapeHtml, formatDuration, getYoutubeId, safeLinkUrl } from './courses-data.js';
@@ -21,6 +22,7 @@ const S = {
   user: null, course: null, flat: [],
   lessonId: null, current: null,
   completed: [], points: 0,
+  quiz: null,
   editingNoteId: null
 };
 let latestNotes = [];
@@ -80,6 +82,19 @@ async function main({ user, profile }) {
   if (!lesson || lesson.isPublished !== true)
     return showError('هذا الدرس غير متاح حالياً', 'قد لا يكون منشوراً بعد — جرّب لاحقاً.');
 
+  let quiz = null, quizAttempt = null;
+  try {
+    const quizSnap = await getDoc(doc(db, 'courses', courseId, 'lessons', S.lessonId, 'quiz', 'current'));
+    if (quizSnap.exists() && quizSnap.data().enabled === true) {
+      quiz = quizSnap.data();
+      const attemptId = `${courseId}__${S.lessonId}`;
+      const attemptSnap = await getDoc(doc(db, 'users', user.uid, 'quizAttempts', attemptId));
+      if (attemptSnap.exists()) quizAttempt = attemptSnap.data();
+    }
+  } catch (err) {
+    console.error('تعذر تحميل اختبار الحلقة:', err);
+  }
+
   /* تسجيل آخر درس متابع (فقط عند التغيير — لتوفير الكتابات) */
   if (progress?.lastLessonId !== S.lessonId)
     saveLastLesson(user.uid, courseId, S.lessonId).catch(() => {});
@@ -88,6 +103,7 @@ async function main({ user, profile }) {
   renderHead(lesson);
   renderVideo(lesson.videoId);
   renderAttachments(lesson.attachments);
+  renderLessonQuiz(quiz, quizAttempt);
   renderActions();
   renderCompleteState();
   renderProgressUI();
@@ -216,6 +232,81 @@ function renderAttachments(list) {
         <svg class="icon dl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg>
       </a>`;
   }).join('');
+}
+
+function renderLessonQuiz(quiz, previousAttempt) {
+  if (!quiz || !Array.isArray(quiz.questions) || quiz.questions.length !== 4) return;
+  S.quiz = quiz;
+
+  const section = $('#lessonQuizSection');
+  const form = $('#lessonQuizForm');
+  const questions = $('#lessonQuizQuestions');
+  section.hidden = false;
+  questions.innerHTML = quiz.questions.map((question, index) => `
+    <fieldset class="quiz-question">
+      <legend>${index + 1}. ${escapeHtml(question.prompt || '')}</legend>
+      <div class="quiz-answer-options">
+        ${(question.options || []).map((option) => `
+          <label class="quiz-option">
+            <input type="radio" name="quiz-${escapeHtml(question.id)}" data-question-id="${escapeHtml(question.id)}" value="${escapeHtml(option.id)}" required>
+            <span>${escapeHtml(option.text || '')}</span>
+          </label>`).join('')}
+      </div>
+    </fieldset>`).join('');
+
+  if (previousAttempt) {
+    showQuizResult(previousAttempt);
+    return;
+  }
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const answers = Object.fromEntries(Array.from(
+      form.querySelectorAll('input[type="radio"]:checked')
+    ).map((input) => [input.dataset.questionId, input.value]));
+    if (Object.keys(answers).length !== quiz.questions.length)
+      return showQuizMessage('أجب عن الأسئلة الخمسة قبل التسليم.', true);
+
+    const button = $('#submitLessonQuiz');
+    button.disabled = true;
+    button.classList.add('loading');
+    try {
+      const submit = httpsCallable(functions, 'submitLessonQuiz');
+      const response = await submit({ courseId: S.course.id, lessonId: S.lessonId, answers });
+      showQuizResult(response.data);
+    } catch (err) {
+      if (err.code === 'functions/already-exists') {
+        try {
+          const attemptId = `${S.course.id}__${S.lessonId}`;
+          const snap = await getDoc(doc(db, 'users', S.user.uid, 'quizAttempts', attemptId));
+          if (snap.exists()) return showQuizResult(snap.data());
+        } catch (readError) {
+          console.error('تعذر تحميل نتيجة الاختبار السابقة:', readError);
+        }
+      }
+      console.error('تعذر تصحيح الاختبار:', err);
+      showQuizMessage(err.code === 'functions/not-found'
+        ? 'خدمة تصحيح الاختبارات لم تُفعّل بعد.'
+        : 'تعذر تصحيح الاختبار الآن. لم تُحفظ محاولة؛ حاول مجدداً.', true);
+      button.disabled = false;
+      button.classList.remove('loading');
+    }
+  });
+}
+
+function showQuizResult(result) {
+  $('#lessonQuizForm').hidden = true;
+  const feedback = $('#lessonQuizResult');
+  feedback.className = `quiz-result ${result.passed ? 'passed' : 'failed'}`;
+  feedback.textContent = `نتيجتك ${result.correct} من ${result.total} (${result.percentage}%). ${result.passed ? 'ناجح، تجاوزت حد النجاح 50%.' : 'لم تصل إلى حد النجاح 50%.'} تم استخدام المحاولة الوحيدة.`;
+  feedback.hidden = false;
+}
+
+function showQuizMessage(message, isError = false) {
+  const feedback = $('#lessonQuizResult');
+  feedback.className = `quiz-result ${isError ? 'failed' : ''}`;
+  feedback.textContent = message;
+  feedback.hidden = false;
 }
 
 /* ==================== التنقل والإتمام ==================== */

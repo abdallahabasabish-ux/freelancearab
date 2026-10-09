@@ -156,6 +156,15 @@
 .att-row { display: flex; gap: .5rem; margin-bottom: .5rem; }
 .att-row .input:first-child { max-width: 200px; }
 
+.quiz-editor { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border); }
+.quiz-editor-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; margin-bottom: .8rem; }
+.quiz-editor-head strong { font-size: .84rem; }
+.quiz-question { padding: .85rem; margin-top: .65rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); }
+.quiz-question .label { font-size: .78rem; }
+.quiz-question-type { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .55rem; margin-top: .55rem; }
+.quiz-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin-top: .55rem; }
+.quiz-boolean-option { padding: .55rem .75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: .82rem; }
+
 /* ---------- النوافذ (توسيع النظام العام) ---------- */
 .modal.modal-lg { max-width: 640px; }
 .modal h3.modal-title { font-size: 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: .55rem; }
@@ -181,4 +190,5 @@
   .editor-form { padding: 1.25rem; }
   .lesson-row1 { flex-wrap: wrap; }
   .lesson-row1 .input:first-child { min-width: 100%; }
+  .quiz-question-type, .quiz-options { grid-template-columns: 1fr; }
 }

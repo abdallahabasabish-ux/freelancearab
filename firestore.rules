@@ -30,6 +30,11 @@ service cloud.firestore {
       allow create: if isSignedIn() && request.auth.uid == uid;
       allow update: if (isSignedIn() && request.auth.uid == uid) || isAdmin();
       allow delete: if isAdmin();
+
+      match /quizAttempts/{attemptId} {
+        allow read: if isSignedIn() && request.auth.uid == uid;
+        allow write: if false;
+      }
     }
 
     /* ================= الجلسات (منع مشاركة الحساب) ================= */
@@ -48,6 +53,20 @@ service cloud.firestore {
       match /lessons/{lessonId} {
         allow read:  if isAdmin() || (isSignedIn() && resource.data.isPublished == true);
         allow write: if isAdmin();
+
+        match /quiz/{quizId} {
+          allow get: if isAdmin() || (
+            isVerified() &&
+            get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'published' &&
+            get(/databases/$(database)/documents/courses/$(courseId)/lessons/$(lessonId)).data.isPublished == true
+          );
+          allow list: if false;
+          allow write: if isAdmin();
+        }
+
+        match /answerKeys/{answerKeyId} {
+          allow read, write: if isAdmin();
+        }
       }
     }
 
