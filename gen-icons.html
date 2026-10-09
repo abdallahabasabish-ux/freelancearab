@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>مولّد أيقونات الأكاديمية</title>
+  <style>
+    body { font-family: Tahoma, sans-serif; text-align: center; padding: 3rem; background: #f5f7fb; }
+    button { font-size: 1.1rem; font-weight: bold; background: #fe8a02; color: #fff;
+             border: 0; padding: 1rem 2.5rem; border-radius: 12px; cursor: pointer; }
+    button:hover { background: #d97400; }
+    p { color: #475467; }
+  </style>
+</head>
+<body>
+  <h2>مولّد أيقونات PWA</h2>
+  <p>اضغط الزر — سيُنزَّل 3 ملفات. انقلها إلى <b>assets/icons/</b></p>
+  <button id="gen">توليد وتنزيل الأيقونات الثلاث</button>
+  <p id="status"></p>
+
+  <script>
+    const ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#1e3a8a"/><path d="M256 118 92 190l164 72 164-72z" fill="#ffffff"/><path d="M150 232v64c0 34 47 58 106 58s106-24 106-58v-64l-106 46z" fill="#ffffff"/><rect x="414" y="196" width="12" height="112" rx="6" fill="#fe8a02"/><circle cx="420" cy="322" r="16" fill="#fe8a02"/></svg>';
+
+    const MASKABLE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" fill="#1e3a8a"/><g transform="translate(51.2 51.2) scale(0.8)"><path d="M256 118 92 190l164 72 164-72z" fill="#ffffff"/><path d="M150 232v64c0 34 47 58 106 58s106-24 106-58v-64l-106 46z" fill="#ffffff"/><rect x="414" y="196" width="12" height="112" rx="6" fill="#fe8a02"/><circle cx="420" cy="322" r="16" fill="#fe8a02"/></g></svg>';
+
+    function svgToPng(svgString, size, filename) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const c = document.createElement('canvas');
+          c.width = c.height = size;
+          c.getContext('2d').drawImage(img, 0, 0, size, size);
+          c.toBlob((blob) => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            a.click();
+            setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+            resolve(filename);
+          }, 'image/png');
+        };
+        img.onerror = () => reject(filename);
+        img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
+      });
+    }
+
+    document.getElementById('gen').addEventListener('click', async () => {
+      const st = document.getElementById('status');
+      st.textContent = 'جارٍ التوليد...';
+      try {
+        await svgToPng(ICON_SVG, 192, 'icon-192.png');
+        await svgToPng(ICON_SVG, 512, 'icon-512.png');
+        await svgToPng(MASKABLE_SVG, 512, 'maskable-512.png');
+        st.innerHTML = '✅ تم! انقل الملفات الثلاثة إلى <b>assets/icons/</b> ثم ارفعها للمستودع — ويمكنك حذف هذا الملف.';
+      } catch (f) {
+        st.textContent = 'فشل توليد: ' + f;
+      }
+    });
+  </script>
+</body>
+</html>
