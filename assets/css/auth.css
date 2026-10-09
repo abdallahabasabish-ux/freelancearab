@@ -1,0 +1,218 @@
+/* ============================================================
+   auth.css — أنماط صفحات المصادقة والملف الشخصي
+   (login / register / profile + رأس الصفحات المسجلة)
+   ============================================================ */
+
+/* ---------- رأس صفحات الحساب ---------- */
+.auth-header {
+  position: sticky; top: 0; z-index: 1000;
+  background: var(--header-bg);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.auth-header-inner {
+  height: var(--header-h);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* ---------- الغلاف والبطاقة ---------- */
+.auth-main {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2.5rem 1.25rem;
+  background: var(--bg-alt);
+}
+.auth-card {
+  width: 100%; max-width: 470px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 2.25rem 2rem;
+}
+.auth-card-wide { max-width: 700px; }
+.auth-panel[hidden] { display: none; }
+
+.auth-title { font-size: 1.5rem; margin-bottom: .4rem; text-align: center; }
+.auth-sub   { color: var(--text-2); font-size: .92rem; text-align: center; margin-bottom: 1.75rem; }
+.auth-alt   { text-align: center; font-size: .9rem; color: var(--text-2); margin-top: 1.5rem; }
+.auth-alt a { color: var(--primary-ink); font-weight: 800; }
+.auth-alt a:hover { text-decoration: underline; }
+
+/* ---------- زر Google ---------- */
+.btn-google {
+  width: 100%;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-weight: 700;
+}
+.btn-google:hover { background: var(--surface-2); border-color: var(--text-3); }
+.btn-google svg { flex-shrink: 0; }
+
+.divider {
+  display: flex; align-items: center; gap: .75rem;
+  color: var(--text-3); font-size: .8rem;
+  margin-block: 1.4rem;
+}
+.divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--border); }
+
+/* ---------- حقول كلمة المرور ---------- */
+.pw-wrap { position: relative; }
+.pw-wrap .input { padding-inline-end: 2.9rem; }
+.pw-toggle {
+  position: absolute; inset-inline-end: .55rem; top: 50%;
+  transform: translateY(-50%);
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); border-radius: 8px;
+}
+.pw-toggle:hover { color: var(--accent); }
+
+/* مقياس قوة كلمة المرور */
+.pw-meter { display: flex; gap: .3rem; height: 4px; margin-top: .5rem; }
+.pw-meter span { flex: 1; background: var(--border); border-radius: 2px; transition: background .25s; }
+.pw-meter[data-score="1"] span:nth-child(1) { background: var(--danger); }
+.pw-meter[data-score="2"] span:nth-child(-n+2) { background: var(--warning); }
+.pw-meter[data-score="3"] span:nth-child(-n+3) { background: var(--success); }
+.pw-meter[data-score="4"] span:nth-child(-n+4) { background: var(--success); }
+.pw-meter-label { font-size: .75rem; color: var(--text-3); margin-top: .3rem; min-height: 1.1em; }
+
+/* ---------- تنبيهات مضمّنة ---------- */
+.alert {
+  display: flex; gap: .6rem; align-items: flex-start;
+  padding: .85rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  font-size: .88rem; margin-bottom: 1.15rem;
+}
+.alert .icon { margin-top: .12rem; flex-shrink: 0; }
+.alert-info    { background: var(--info-soft);    color: var(--info);    border-color: rgba(2,132,199,.25); }
+.alert-success { background: var(--success-soft); color: var(--success); border-color: rgba(22,163,74,.25); }
+.alert-warning { background: var(--warning-soft); color: var(--warning); border-color: rgba(217,119,6,.3); }
+.alert-error   { background: var(--danger-soft);  color: var(--danger);  border-color: rgba(220,38,38,.25); }
+
+/* ---------- لوحة التحقق من البريد ---------- */
+.verify-panel { text-align: center; }
+.verify-icon {
+  width: 86px; height: 86px; border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.25rem;
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.07); } }
+.verify-email {
+  display: inline-block; font-weight: 800; color: var(--primary-ink);
+  background: var(--primary-soft);
+  padding: .2rem .8rem; border-radius: 8px;
+  direction: ltr; max-width: 100%; overflow-wrap: anywhere;
+}
+.verify-actions { display: flex; flex-direction: column; gap: .75rem; margin-top: 1.5rem; }
+
+/* ---------- دوّار التحميل داخل الأزرار ---------- */
+.btn .spinner {
+  display: none;
+  width: 1.05em; height: 1.05em;
+  border: 2.5px solid currentColor; border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.btn.loading { pointer-events: none; opacity: .85; }
+.btn.loading .spinner { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- رقاقة المستخدم في الهيدر ---------- */
+.user-chip { display: flex; align-items: center; gap: .5rem; }
+.user-chip-link { display: flex; align-items: center; gap: .5rem; border-radius: 999px; }
+.user-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--border);
+  background: var(--surface-2);
+}
+.user-name {
+  font-weight: 700; font-size: .9rem;
+  max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.icon-btn {
+  width: 38px; height: 38px;
+  border-radius: var(--radius-sm);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-2);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: color var(--transition), border-color var(--transition);
+}
+.icon-btn:hover { color: var(--danger); border-color: var(--danger); }
+@media (max-width: 639px) { .user-name { display: none; } }
+
+/* ---------- صفحة الملف الشخصي ---------- */
+.page-head { margin-bottom: 2rem; }
+.page-head h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); margin-bottom: .4rem; }
+.page-head p  { color: var(--text-2); }
+
+.profile-card { padding: 2rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.1rem; }
+@media (max-width: 575px) { .form-grid { grid-template-columns: 1fr; } }
+
+.phone-row { display: grid; grid-template-columns: 130px 1fr; gap: .75rem; }
+@media (max-width: 420px) { .phone-row { grid-template-columns: 1fr; } }
+
+/* رافع الصورة (أفاتار) */
+.avatar-upload {
+  display: flex; flex-direction: column; align-items: center; gap: .55rem;
+  margin-bottom: 1.75rem;
+}
+.avatar-frame { position: relative; width: 112px; height: 112px; }
+.avatar-frame img {
+  width: 100%; height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border);
+  background: var(--surface-2);
+}
+.avatar-cam {
+  position: absolute; bottom: 0; inset-inline-end: 0;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  border: 3px solid var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+.avatar-cam:hover { background: var(--accent-dark); transform: scale(1.08); }
+.avatar-hint { font-size: .78rem; color: var(--text-3); text-align: center; }
+.avatar-remove { font-size: .8rem; color: var(--danger); font-weight: 700; }
+.avatar-remove:hover { text-decoration: underline; }
+
+/* صندوق الموقع الجغرافي */
+.loc-box {
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1.15rem;
+  display: flex; gap: 1rem; align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+.loc-box > .icon { color: var(--accent); margin-top: .15rem; flex-shrink: 0; }
+.loc-box h3 { font-size: .98rem; margin-bottom: .25rem; }
+.loc-desc { font-size: .85rem; color: var(--text-2); margin-bottom: .75rem; }
+.loc-status { font-size: .88rem; color: var(--text-2); margin-top: .6rem; }
+.loc-status.loading { color: var(--info); font-weight: 700; }
+.loc-status.ok { color: var(--success); font-weight: 700; }
+.loc-status.err { color: var(--warning); }
+
+.form-footer {
+  margin-top: 1.75rem;
+  display: flex; flex-direction: column; gap: .6rem; align-items: center;
+}
+.form-note { font-size: .78rem; color: var(--text-3); text-align: center; }
+
+/* ---------- تذييل صفحات الحساب ---------- */
+.auth-footer {
+  text-align: center;
+  padding: 1.25rem;
+  font-size: .82rem; color: var(--text-3);
+  border-top: 1px solid var(--border);
+}
