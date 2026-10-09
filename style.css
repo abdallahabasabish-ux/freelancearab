@@ -1,0 +1,109 @@
+/* style.css */
+:root {
+    /* الألوان الأساسية */
+    --primary-color: #1e3a8a; /* الأزرق الغامق */
+    --secondary-color: #fe8a02; /* البرتقالي */
+    --bg-color: #f9fafb; /* لون الخلفية الفاتح */
+    --surface-color: #ffffff; /* لون الكروت */
+    --text-color: #111827; /* لون النص الأساسي */
+    --text-muted: #6b7280; /* لون النص الفرعي */
+    --border-color: #e5e7eb;
+}
+
+/* الوضع الليلي */
+[data-theme="dark"] {
+    --primary-color: #3b82f6; /* أزرق أفتح قليلاً ليناسب الخلفية الداكنة */
+    --secondary-color: #fe8a02;
+    --bg-color: #111827;
+    --surface-color: #1f2937;
+    --text-color: #f9fafb;
+    --text-muted: #9ca3af;
+    --border-color: #374151;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    direction: rtl; /* دعم اللغة العربية */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    line-height: 1.6;
+}
+
+/* التنسيقات العامة */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+header {
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    opacity: 0.9;
+}
+
+/* الحقول والنماذج */
+input, select, textarea {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
