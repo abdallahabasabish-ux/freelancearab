@@ -14,9 +14,6 @@ import { listenLessonNotes, addNote, updateNoteText, deleteNote } from './notes.
 const $ = (s) => document.querySelector(s);
 const toast = (m, t) => window.AFA?.toast(m, t);
 
-const ctx = await requireAuth();
-if (ctx) main(ctx);
-
 /* ---------- حالة الصفحة ---------- */
 const S = {
   user: null, course: null, flat: [],
@@ -27,6 +24,9 @@ const S = {
 };
 let latestNotes = [];
 let player = null, playerReady = false, hasVideo = false;
+
+const ctx = await requireAuth();
+if (ctx) main(ctx);
 
 async function main({ user, profile }) {
   S.user = user;

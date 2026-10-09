@@ -411,6 +411,7 @@ async function saveCourse() {
   S.saving = true;
   const btn = $('#saveBtn');
   btn.classList.add('loading');
+  let saveStage = 'قراءة دروس الكورس الحالية';
 
   try {
     /* احتفظ بمعرف الكورس لاستخدامه عند إعادة المحاولة بعد فشل الحفظ */
@@ -482,13 +483,18 @@ async function saveCourse() {
 
     const courseRef = doc(db, 'courses', S.courseId);
     operations.push((batch) => batch.set(courseRef, payload, { merge: true }));
+    saveStage = 'حفظ الكورس والدروس والاختبارات في Firestore';
     await commitInChunks(operations);
 
     toast('تم حفظ الكورس بنجاح ✅', 'success');
     showList();
   } catch (err) {
     console.error(err);
-    toast('تعذر الحفظ — تحقق من اتصالك وحاول مجدداً.', 'error');
+    const code = err?.code || 'unknown';
+    const message = code === 'permission-denied'
+      ? 'رفضت قواعد Firestore الحفظ. تأكد من نشر firestore.rules على مشروع freelance-arab، ومن وجود مستند admins/{UID حسابك}.'
+      : 'تحقق من اتصال الإنترنت ثم حاول مجدداً.';
+    toast(`تعذر الحفظ أثناء ${saveStage}. ${message} (${code})`, 'error');
   } finally {
     S.saving = false;
     btn.classList.remove('loading');

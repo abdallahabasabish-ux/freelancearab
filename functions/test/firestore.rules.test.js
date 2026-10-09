@@ -6,7 +6,9 @@ const {
   assertSucceeds,
   initializeTestEnvironment
 } = require('@firebase/rules-unit-testing');
-const { doc, getDoc, setDoc } = require('firebase/firestore');
+const {
+  collection, doc, getDoc, getDocs, setDoc, writeBatch
+} = require('firebase/firestore');
 
 let env;
 const courseId = 'course-1';
@@ -65,6 +67,28 @@ test('unverified and signed-out users cannot read quiz questions', async () => {
 test('administrators can read answer keys', async () => {
   const adminDb = env.authenticatedContext('admin-user', { email_verified: true }).firestore();
   await assertSucceeds(getDoc(doc(adminDb, `${lessonPath}/answerKeys/current`)));
+});
+
+test('administrators can save and delete courses, lessons, and quizzes', async () => {
+  const db = env.authenticatedContext('admin-user', { email_verified: true }).firestore();
+  const courseRef = doc(db, 'courses/new-course');
+  const lessonRef = doc(db, 'courses/new-course/lessons/new-lesson');
+  const quizRef = doc(db, 'courses/new-course/lessons/new-lesson/quiz/current');
+  const keysRef = doc(db, 'courses/new-course/lessons/new-lesson/answerKeys/current');
+  const saveBatch = writeBatch(db);
+  saveBatch.set(courseRef, { title: 'كورس اختبار', status: 'draft' });
+  saveBatch.set(lessonRef, { title: 'درس اختبار', isPublished: false });
+  saveBatch.set(quizRef, { enabled: false });
+  saveBatch.set(keysRef, { correctByQuestionId: {} });
+  await assertSucceeds(saveBatch.commit());
+  await assertSucceeds(getDocs(collection(db, 'courses/new-course/lessons')));
+
+  const deleteBatch = writeBatch(db);
+  deleteBatch.delete(quizRef);
+  deleteBatch.delete(keysRef);
+  deleteBatch.delete(lessonRef);
+  deleteBatch.delete(courseRef);
+  await assertSucceeds(deleteBatch.commit());
 });
 
 test('students can read and save their own course progress', async () => {
