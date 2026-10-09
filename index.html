@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول | أكاديمية عرب فريلانسر</title>
+    <title>الملف الشخصي | أكاديمية عرب فريلانسر</title>
     <link rel="stylesheet" href="style.css">
     <link rel="manifest" href="manifest.json">
 </head>
@@ -11,77 +11,68 @@
     <header>
         <div class="container nav-container">
             <a href="/" class="logo">أكاديمية عرب فريلانسر</a>
-            <button id="theme-toggle" class="btn" style="background:none; border:1px solid var(--border-color); color:var(--text-color);">تبديل الوضع 🌙</button>
+            <nav>
+                <button id="theme-toggle" class="btn" style="background:none; border:1px solid var(--border-color); color:var(--text-color);">🌙</button>
+            </nav>
         </div>
     </header>
 
-    <div class="container" style="max-width: 600px; margin-top: 2rem;">
+    <div class="container" style="max-width: 800px; margin-top: 2rem;">
         
-        <!-- قسم تسجيل الدخول / التسجيل -->
-        <div id="auth-section" style="background-color: var(--surface-color); padding: 2rem; border-radius: 8px; border: 1px solid var(--border-color);">
-            <h2 style="margin-bottom: 1rem; color: var(--primary-color);">إنشاء حساب جديد</h2>
-            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">للوصول إلى الكورسات وتتبع تقدمك.</p>
+        <!-- قسم المصادقة -->
+        <div id="auth-section" class="card" style="max-width: 500px; margin: 0 auto;">
+            <h2 style="color: var(--primary-color); margin-bottom: 1rem; text-align: center;">إنشاء حساب / تسجيل دخول</h2>
+            <p style="color: var(--text-muted); text-align: center; margin-bottom: 1.5rem;">انضم إلينا لتبدأ مسيرتك في العمل الحر.</p>
 
-            <button id="google-login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem; background-color: #4285F4;">
-                التسجيل بواسطة Google (مُستحسن)
-            </button>
-            
-            <div style="text-align: center; margin-bottom: 1rem; color: var(--text-muted);">أو</div>
+            <button id="google-login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">تسجيل الدخول باستخدام Google</button>
+            <div id="auth-alert" class="alert"></div>
 
-            <!-- نموذج استكمال البيانات الإلزامية -->
-            <form id="profile-form" style="display: none;">
-                <h3 style="margin-bottom: 1rem;">استكمال بيانات الملف الشخصي</h3>
-                
+            <form id="profile-form" style="display: none; margin-top: 1.5rem;">
+                <h3 style="margin-bottom: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">استكمال بياناتك (لمرة واحدة)</h3>
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="first-name" placeholder="الاسم الأول" required>
-                    <input type="text" id="middle-name" placeholder="الاسم الأوسط" required>
-                    <input type="text" id="last-name" placeholder="اسم العائلة" required>
+                    <input type="text" id="f-name" placeholder="الاسم الأول" required>
+                    <input type="text" id="l-name" placeholder="اسم العائلة" required>
                 </div>
-
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="country-code" placeholder="كود الدولة (+20)" style="width: 30%;" required>
+                    <input type="text" id="c-code" placeholder="كود الدولة (+20)" style="width: 30%;" required>
                     <input type="tel" id="phone" placeholder="رقم الهاتف" style="width: 70%;" required>
                 </div>
-
-                <input type="number" id="age" placeholder="السن" min="10" max="100" required>
-                
-                <p style="font-size: 0.9rem; color: var(--secondary-color); margin-bottom: 0.5rem;">سيتم تحديد الدولة والمدينة جغرافياً بشكل تلقائي لحفظها في ملفك.</p>
-                
-                <button type="submit" id="save-profile-btn" class="btn btn-secondary" style="width: 100%;">حفظ البيانات والدخول للأكاديمية</button>
+                <input type="number" id="age" placeholder="العمر" min="12" max="99" required>
+                <p style="font-size: 0.85rem; color: var(--secondary-color); margin-bottom: 1rem;">ملاحظة: سيتم طلب إذن تحديد الموقع الجغرافي لتوثيق الحساب.</p>
+                <button type="submit" id="save-profile-btn" class="btn btn-secondary" style="width: 100%;">حفظ ودخول الأكاديمية</button>
             </form>
-            
-            <p id="auth-message" style="margin-top: 1rem; font-weight: bold; text-align: center;"></p>
         </div>
 
-        <!-- قسم عرض حالة تسجيل الدخول (يظهر بعد الدخول بنجاح) -->
-        <div id="user-dashboard" style="display: none; text-align: center; margin-top: 2rem;">
-            <img id="user-photo" src="" alt="صورة المستخدم" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--primary-color);">
-            <h2 id="welcome-message" style="margin-top: 1rem;"></h2>
-            <p id="user-location" style="color: var(--text-muted); margin-bottom: 1rem;"></p>
-            <a href="courses.html" class="btn btn-primary">تصفح الكورسات</a>
-            <button id="logout-btn" class="btn" style="background-color: #ef4444; color: white;">تسجيل خروج</button>
+        <!-- قسم لوحة الطالب (يظهر بعد الدخول) -->
+        <div id="user-dashboard" style="display: none;">
+            <div class="card" style="text-align: center; margin-bottom: 2rem;">
+                <img id="user-photo" src="" alt="الصورة الشخصية" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary-color); margin-bottom: 1rem;">
+                <h2 id="welcome-message" style="color: var(--primary-color); margin-bottom: 0.5rem;"></h2>
+                <p id="user-info" style="color: var(--text-muted); margin-bottom: 1rem;"></p>
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem;">النقاط المكتسبة: <span id="user-points" style="color: var(--secondary-color);">0</span> 🏆</p>
+                
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <a href="courses.html" class="btn btn-primary">تصفح الكورسات</a>
+                    <button id="logout-btn" class="btn btn-danger">تسجيل خروج</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem; display: inline-block;">شهاداتي المعتمدة</h3>
+                <div id="certificates-list">
+                    <p style="color: var(--text-muted);">جاري تحميل الشهادات...</p>
+                </div>
+            </div>
         </div>
 
     </div>
 
     <script type="module" src="auth.js"></script>
     <script>
-        // تسجيل PWA Service Worker
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js');
-            });
-        }
-        
-        // كود بسيط لتبديل الوضع الليلي
-        const themeToggle = document.getElementById('theme-toggle');
-        let currentTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-        themeToggle.addEventListener('click', () => {
-            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-theme', currentTheme);
-            localStorage.setItem('theme', currentTheme);
-        });
+        const tt = document.getElementById('theme-toggle');
+        let th = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', th);
+        tt.onclick = () => { th = th === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', th); localStorage.setItem('theme', th); };
     </script>
 </body>
 </html>
