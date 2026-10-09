@@ -30,7 +30,7 @@ const newId    = () => crypto.randomUUID();
 const newModule = () => ({ _id: newId(), title: '', lessons: [] });
 const newLesson = () => ({ _id: newId(), title: '', durationMin: '', videoURL: '', description: '', attachments: [] });
 
-function init() {
+async function init() {
   $('#newCourseBtn').addEventListener('click', () => openEditor(null));
   $('#newCourseBtn2').addEventListener('click', () => openEditor(null));
   $('#backToList').addEventListener('click', showList);
@@ -43,7 +43,9 @@ function init() {
   $('#courseForm').addEventListener('submit', (e) => { e.preventDefault(); saveCourse(); });
   bindBuilderEvents();
   bindConfirm();
-  loadList();
+  await loadList();
+  $('#adminSkeleton').hidden = true;
+  $('#adminContent').hidden = false;
 }
 
 /* ==================== القائمة ==================== */
