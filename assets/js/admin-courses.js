@@ -28,7 +28,16 @@ const S = {
 
 const newId    = () => crypto.randomUUID();
 const newModule = () => ({ _id: newId(), title: '', lessons: [] });
-const newLesson = () => ({ _id: newId(), title: '', durationMin: '', videoURL: '', description: '', attachments: [], quizQuestions: defaultQuizQuestions() });
+const newLesson = () => ({ _id: newId(), title: '', durationMin: '', videoURL: '', description: '', attachments: [], quizQuestions: [] });
+
+async function commitInChunks(operations) {
+  const batchSize = 450;
+  for (let start = 0; start < operations.length; start += batchSize) {
+    const batch = writeBatch(db);
+    operations.slice(start, start + batchSize).forEach((operation) => operation(batch));
+    await batch.commit();
+  }
+}
 
 function defaultQuizQuestions() {
   return Array.from({ length: 4 }, (_, index) => {
@@ -404,21 +413,20 @@ async function saveCourse() {
   btn.classList.add('loading');
 
   try {
-    /* كورس جديد → معرف من Firestore */
+    /* احتفظ بمعرف الكورس لاستخدامه عند إعادة المحاولة بعد فشل الحفظ */
     if (!S.courseId) {
       const ref = doc(collection(db, 'courses'));
       S.courseId = ref.id;
       payload.createdAt = serverTimestamp();
-      await setDoc(ref, payload);
-    } else {
-      await setDoc(doc(db, 'courses', S.courseId), payload, { merge: true });
     }
 
-    /* كتابة الدروس (Batch واحد) */
-    const batch = writeBatch(db);
+    const existing = await getDocs(collection(db, 'courses', S.courseId, 'lessons'));
+    const keep = new Set(S.modules.flatMap((m) => m.lessons.map((l) => l._id)));
+    const operations = [];
+
     S.modules.forEach((m, mi) => {
       m.lessons.forEach((l, li) => {
-        batch.set(doc(db, 'courses', S.courseId, 'lessons', l._id), {
+        operations.push((batch) => batch.set(doc(db, 'courses', S.courseId, 'lessons', l._id), {
           moduleId: m._id,
           moduleTitle: m.title.trim() || `الفصل ${mi + 1}`,
           title: l.title.trim() || `درس ${li + 1}`,
@@ -432,7 +440,7 @@ async function saveCourse() {
           order: li,
           isPublished: status === 'published',
           updatedAt: serverTimestamp()
-        }, { merge: true });
+        }, { merge: true }));
 
         const questions = l.quizQuestions || [];
         const quizRef = doc(db, 'courses', S.courseId, 'lessons', l._id, 'quiz', 'current');
@@ -440,7 +448,7 @@ async function saveCourse() {
         if (questions.length) {
           const version = newId();
           const complete = isQuizComplete(questions);
-          batch.set(quizRef, {
+          operations.push((batch) => batch.set(quizRef, {
             version,
             enabled: status === 'published' && complete,
             passPercent: 50,
@@ -451,30 +459,30 @@ async function saveCourse() {
               options: question.options.map((option) => ({ id: option.id, text: option.text.trim() }))
             })),
             updatedAt: serverTimestamp()
-          });
-          batch.set(keysRef, {
+          }));
+          operations.push((batch) => batch.set(keysRef, {
             version,
             correctByQuestionId: Object.fromEntries(questions
               .filter((question) => question.correctOptionId)
               .map((question) => [question.id, question.correctOptionId]))
-          });
+          }));
         } else {
-          batch.delete(quizRef);
-          batch.delete(keysRef);
+          operations.push((batch) => batch.delete(quizRef));
+          operations.push((batch) => batch.delete(keysRef));
         }
       });
     });
-    await batch.commit();
 
-    /* حذف الدروس المزالة */
-    const keep = new Set(S.modules.flatMap((m) => m.lessons.map((l) => l._id)));
-    const existing = await getDocs(collection(db, 'courses', S.courseId, 'lessons'));
     const removed = existing.docs.filter((d) => !keep.has(d.id));
-    if (removed.length) {
-      const b2 = writeBatch(db);
-      removed.forEach((d) => b2.delete(d.ref));
-      await b2.commit();
-    }
+    removed.forEach((lesson) => {
+      operations.push((batch) => batch.delete(doc(db, 'courses', S.courseId, 'lessons', lesson.id, 'quiz', 'current')));
+      operations.push((batch) => batch.delete(doc(db, 'courses', S.courseId, 'lessons', lesson.id, 'answerKeys', 'current')));
+      operations.push((batch) => batch.delete(lesson.ref));
+    });
+
+    const courseRef = doc(db, 'courses', S.courseId);
+    operations.push((batch) => batch.set(courseRef, payload, { merge: true }));
+    await commitInChunks(operations);
 
     toast('تم حفظ الكورس بنجاح ✅', 'success');
     showList();
@@ -496,13 +504,18 @@ function askDeleteCourse(id) {
     async () => {
       try {
         const ls = await getDocs(collection(db, 'courses', id, 'lessons'));
-        const b = writeBatch(db);
-        ls.docs.forEach((d) => b.delete(d.ref));
-        b.delete(doc(db, 'courses', id));
-        await b.commit();
+        const operations = [];
+        ls.docs.forEach((lesson) => {
+          operations.push((batch) => batch.delete(doc(db, 'courses', id, 'lessons', lesson.id, 'quiz', 'current')));
+          operations.push((batch) => batch.delete(doc(db, 'courses', id, 'lessons', lesson.id, 'answerKeys', 'current')));
+          operations.push((batch) => batch.delete(lesson.ref));
+        });
+        operations.push((batch) => batch.delete(doc(db, 'courses', id)));
+        await commitInChunks(operations);
         toast('تم حذف الكورس.', 'success');
-        loadList();
-      } catch {
+        await loadList();
+      } catch (err) {
+        console.error(err);
         toast('تعذر الحذف.', 'error');
       }
     }

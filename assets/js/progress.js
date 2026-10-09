@@ -63,9 +63,9 @@ export async function toggleLessonComplete({ uid, courseId, lessonId, completedL
 
   const batch = writeBatch(db);
   batch.set(progressDocRef(uid, courseId), data, { merge: true });
-  batch.update(doc(db, 'users', uid), {
+  batch.set(doc(db, 'users', uid), {
     points: increment(wasDone ? -POINTS_PER_LESSON : POINTS_PER_LESSON)
-  });
+  }, { merge: true });
   await batch.commit();
 
   return { completedLessons: next, percent, wasDone };

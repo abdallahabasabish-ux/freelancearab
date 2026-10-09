@@ -57,7 +57,13 @@ async function main({ user, profile }) {
     return showError('لا توجد دروس بعد', 'يعمل الفريق على نشر محتوى هذا الكورس قريباً.');
 
   /* التقدم */
-  const progress = await fetchProgress(user.uid, courseId).catch(() => null);
+  let progress = null;
+  try {
+    progress = await fetchProgress(user.uid, courseId);
+  } catch (err) {
+    console.error('تعذر تحميل تقدم الطالب:', err);
+    toast('تعذر تحميل تقدمك المحفوظ.', 'error');
+  }
   S.completed = progress?.completedLessons || [];
 
   S.course = { ...course, id: courseId };
@@ -96,8 +102,14 @@ async function main({ user, profile }) {
   }
 
   /* تسجيل آخر درس متابع (فقط عند التغيير — لتوفير الكتابات) */
-  if (progress?.lastLessonId !== S.lessonId)
-    saveLastLesson(user.uid, courseId, S.lessonId).catch(() => {});
+  if (progress?.lastLessonId !== S.lessonId) {
+    try {
+      await saveLastLesson(user.uid, courseId, S.lessonId);
+    } catch (err) {
+      console.error('تعذر حفظ آخر درس تمت متابعته:', err);
+      toast('تعذر حفظ تقدمك الآن. سيظل بإمكانك متابعة الدرس.', 'error');
+    }
+  }
 
   renderSidebar();
   renderHead(lesson);

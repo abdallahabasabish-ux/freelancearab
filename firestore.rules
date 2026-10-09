@@ -72,8 +72,8 @@ service cloud.firestore {
 
     /* ================= تقدم الطلاب ================= */
     match /progress/{docId} {
-      allow read:  if isSignedIn() && resource.data.uid == request.auth.uid; 
-  allow read:  if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow read: if isAdmin() ||
+        (isSignedIn() && (resource == null || resource.data.uid == request.auth.uid));
       allow create, update: if isSignedIn() && request.resource.data.uid == request.auth.uid;
       allow delete: if false;
     }

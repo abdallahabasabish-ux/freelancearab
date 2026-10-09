@@ -66,3 +66,28 @@ test('administrators can read answer keys', async () => {
   const adminDb = env.authenticatedContext('admin-user', { email_verified: true }).firestore();
   await assertSucceeds(getDoc(doc(adminDb, `${lessonPath}/answerKeys/current`)));
 });
+
+test('students can read and save their own course progress', async () => {
+  const db = env.authenticatedContext('student-user').firestore();
+  const progressRef = doc(db, 'progress/student-user__course-1');
+
+  await assertSucceeds(getDoc(progressRef));
+  await assertSucceeds(setDoc(progressRef, {
+    uid: 'student-user',
+    courseId,
+    lastLessonId: lessonId,
+    completedLessons: []
+  }));
+  await assertSucceeds(getDoc(progressRef));
+  await assertSucceeds(setDoc(progressRef, {
+    uid: 'student-user',
+    courseId,
+    lastLessonId: lessonId,
+    completedLessons: [lessonId]
+  }));
+  await assertFails(setDoc(doc(db, 'progress/other-user__course-1'), {
+    uid: 'other-user',
+    courseId,
+    completedLessons: []
+  }));
+});
