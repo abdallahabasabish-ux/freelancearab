@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- تُحدَّث ديناميكياً باسم الكورس والدرس -->
+  <title>الدرس | أكاديمية عرب فريلانسر</title>
+  <meta name="description" content="درس تعليمي في أكاديمية عرب فريلانسر.">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/learn.css">
+</head>
+<body>
+
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+        <span class="brand-name">أكاديمية <b>عرب فريلانسر</b></span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="التنقل الرئيسي">
+        <a href="/" class="nav-link">الرئيسية</a>
+        <a href="/courses.html" class="nav-link active">الكورسات</a>
+        <a href="/dashboard.html" class="nav-link">لوحتي</a>
+        <a href="/verify.html" class="nav-link">التحقق من شهادة</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <div class="user-chip" data-auth-user hidden>
+          <a href="/profile.html" class="user-chip-link" title="ملفي الشخصي">
+            <img class="user-avatar" data-user-avatar alt="" src="/assets/icons/icon.svg">
+            <span class="user-name" data-user-name>حسابي</span>
+          </a>
+          <button class="icon-btn" data-logout aria-label="تسجيل الخروج" title="تسجيل الخروج">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-log-out"></use></svg>
+          </button>
+        </div>
+        <a href="/login.html" class="btn btn-outline btn-sm" data-auth-guest hidden>دخول</a>
+        <a href="/register.html" class="btn btn-accent btn-sm" data-auth-guest hidden>ابدأ مجاناً</a>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="lesson-page">
+    <div class="container">
+
+      <!-- ====== هيكل تحميل مؤقت ====== -->
+      <div id="lessonSkeleton">
+        <div class="lesson-layout">
+          <div class="skeleton" style="height:65vh; border-radius:var(--radius-lg);"></div>
+          <div>
+            <div class="skeleton" style="aspect-ratio:16/9; border-radius:var(--radius-lg); margin-bottom:1.5rem;"></div>
+            <div class="skeleton skeleton-text" style="width:45%; height:1.6rem;"></div>
+            <div class="skeleton skeleton-text"></div>
+            <div class="skeleton skeleton-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====== صفحة الدرس ====== -->
+      <div class="lesson-layout" id="lessonLayout" hidden>
+
+        <!-- الفصول والدروس -->
+        <aside class="lesson-sidebar card">
+          <div class="sidebar-head">
+            <h2 id="sidebarCourseTitle"></h2>
+            <div class="progress"><div class="progress-bar" id="sidebarProgressBar"></div></div>
+            <p class="sidebar-progress-label" id="sidebarPercent"></p>
+          </div>
+          <nav class="curr-scroll" id="curriculumNav" aria-label="دروس الكورس"></nav>
+        </aside>
+
+        <!-- العمود الرئيسي -->
+        <div class="lesson-main">
+
+          <article class="card lesson-content">
+            <div class="lesson-topline">
+              <a href="/courses.html">الكورسات</a>
+              <span>/</span>
+              <a id="crumbCourse" href="#"></a>
+              <span>/</span>
+              <span id="crumbModule"></span>
+            </div>
+
+            <h1 id="lessonTitle"></h1>
+
+            <div class="lesson-meta-row">
+              <span class="points-chip" id="pointsChip" title="رصيد نقاطك">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-star"></use></svg>
+                نقاطي: <b>0</b>
+              </span>
+              <span class="badge badge-primary" id="notesCountBadge" hidden></span>
+            </div>
+
+            <!-- مشغل اليوتيوب (يُستبدل بـ IFrame API) -->
+            <div class="video-frame" id="videoFrame">
+              <div class="skeleton" id="videoLoading" style="position:absolute; inset:0; border-radius:0;"></div>
+              <div id="playerMount"></div>
+            </div>
+
+            <div class="lesson-desc" id="descText"></div>
+
+            <section class="attachments" id="attachmentsWrap" hidden>
+              <h2>
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg>
+                ملفات ومرفقات الدرس
+              </h2>
+              <div id="attachmentsList"></div>
+            </section>
+
+            <div class="lesson-actions">
+              <button type="button" class="btn btn-ghost" id="prevBtn">
+                <svg class="icon icon-flip" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-arrow-left"></use></svg>
+                السابق
+              </button>
+              <button type="button" class="btn btn-primary btn-complete" id="completeBtn"></button>
+              <button type="button" class="btn btn-ghost" id="nextBtn">
+                التالي
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-arrow-left"></use></svg>
+              </button>
+            </div>
+          </article>
+
+          <!-- الملاحظات الزمنية -->
+          <section class="card notes-section" aria-label="ملاحظاتي">
+            <div class="notes-head">
+              <h2>
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sticky-note"></use></svg>
+                ملاحظاتي على هذا الدرس
+              </h2>
+              <span class="badge badge-accent">تُحفظ في حسابك فقط</span>
+            </div>
+
+            <div class="note-composer">
+              <textarea id="noteInput" placeholder="اكتب ملاحظتك هنا... سيتم ربطها تلقائياً بالثانية الحالية من الفيديو (Ctrl + Enter للحفظ السريع)" aria-label="نص الملاحظة"></textarea>
+              <div class="composer-foot">
+                <span class="composer-hint">ستُضاف الملاحظة عند الثانية <b id="liveTime">00:00</b> — اضغط عليها لاحقاً للانتقال إليها</span>
+                <button type="button" class="btn btn-accent btn-sm" id="addNoteBtn" disabled>
+                  <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-plus"></use></svg>
+                  إضافة ملاحظة
+                </button>
+              </div>
+            </div>
+
+            <div id="notesList"></div>
+            <div class="notes-empty" id="notesEmpty">
+              لا ملاحظات بعد — دوّن أول ملاحظة لك أثناء المشاهدة!
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- ====== حالات الخطأ ====== -->
+      <div class="error-state" id="lessonError" hidden style="padding-block:4.5rem;">
+        <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-alert"></use></svg>
+        <h2 id="errorTitle"></h2>
+        <p id="errorText"></p>
+        <a href="/courses.html" class="btn btn-primary">تصفح الكورسات</a>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ====== نافذة إكمال الكورس ====== -->
+  <div class="modal-overlay" id="doneModal" role="dialog" aria-modal="true" aria-labelledby="doneTitle">
+    <div class="modal" style="text-align:center;">
+      <div class="done-hero">
+        <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+      </div>
+      <h2 id="doneTitle">مبروك! أكملت الكورس بالكامل 🎉</h2>
+      <p style="color:var(--text-2); margin-top:.5rem;">
+        أحسنت — تم تسجيل إنجازك، وستصدر شهادتك الموثقة بكود تحقق خاص بعد المراجعة.
+      </p>
+      <div class="done-actions">
+        <a href="/dashboard.html" class="btn btn-accent">الانتقال للوحتي</a>
+        <a href="#" class="btn btn-outline" id="doneCourseLink" data-close-modal>العودة للكورس</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== نافذة تأكيد عامة ====== -->
+  <div class="modal-overlay" id="confirmModal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal">
+      <h3 id="confirmTitle" style="margin-bottom:.5rem;"></h3>
+      <p style="color:var(--text-2); font-size:.92rem;" id="confirmText"></p>
+      <div class="done-actions">
+        <button type="button" class="btn btn-ghost" data-close-modal>إلغاء</button>
+        <button type="button" class="btn btn-danger" id="confirmYes">تأكيد</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+  <script type="module" src="/assets/js/lesson.js"></script>
+</body>
+</html>
