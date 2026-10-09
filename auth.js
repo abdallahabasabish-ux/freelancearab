@@ -1,144 +1,119 @@
 // auth.js
-import { auth, db } from './firebase-config.js';
-import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+import { auth, db, googleProvider } from './firebase-config.js';
+import { signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
 import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-const provider = new GoogleAuthProvider();
-
-// عناصر واجهة المستخدم
-const authSection = document.getElementById('auth-section');
-const profileForm = document.getElementById('profile-form');
-const googleBtn = document.getElementById('google-login-btn');
-const authMessage = document.getElementById('auth-message');
-const userDashboard = document.getElementById('user-dashboard');
-const logoutBtn = document.getElementById('logout-btn');
+const DOM = {
+    authSection: document.getElementById('auth-section'),
+    profileForm: document.getElementById('profile-form'),
+    googleBtn: document.getElementById('google-login-btn'),
+    alert: document.getElementById('auth-alert'),
+    dashboard: document.getElementById('user-dashboard'),
+    logoutBtn: document.getElementById('logout-btn')
+};
 
 let currentUser = null;
 
-// 1. مراقبة حالة تسجيل الدخول
+function showAlert(msg, isError = false) {
+    DOM.alert.style.display = 'block';
+    DOM.alert.className = isError ? 'alert alert-error' : 'alert alert-success';
+    DOM.alert.innerText = msg;
+}
+
 onAuthStateChanged(auth, async (user) => {
     if (user) {
         currentUser = user;
-        // التحقق مما إذا كان الطالب قد استكمل بياناته سابقاً
-        const docRef = doc(db, "students", user.uid);
-        const docSnap = await getDoc(docRef);
-
+        const docSnap = await getDoc(doc(db, "students", user.uid));
+        
         if (docSnap.exists()) {
-            // البيانات مكتملة، عرض لوحة الترحيب
-            showUserDashboard(docSnap.data());
+            renderDashboard(docSnap.data());
         } else {
-            // أول مرة يسجل دخول، إظهار نموذج استكمال البيانات
-            googleBtn.style.display = 'none';
-            profileForm.style.display = 'block';
-            authMessage.innerText = "نجح تسجيل الدخول! يرجى استكمال البيانات أدناه.";
-            authMessage.style.color = "green";
+            DOM.googleBtn.style.display = 'none';
+            DOM.profileForm.style.display = 'block';
+            showAlert("يرجى استكمال البيانات الإلزامية مرة واحدة فقط.");
         }
     } else {
-        // غير مسجل دخول
-        authSection.style.display = 'block';
-        userDashboard.style.display = 'none';
-        googleBtn.style.display = 'block';
-        profileForm.style.display = 'none';
+        DOM.authSection.style.display = 'block';
+        DOM.dashboard.style.display = 'none';
+        DOM.googleBtn.style.display = 'block';
+        DOM.profileForm.style.display = 'none';
+        DOM.alert.style.display = 'none';
     }
 });
 
-// 2. التسجيل بواسطة Google
-googleBtn.addEventListener('click', async () => {
-    try {
-        await signInWithPopup(auth, provider);
-    } catch (error) {
-        authMessage.innerText = "حدث خطأ أثناء تسجيل الدخول: " + error.message;
-        authMessage.style.color = "red";
-    }
-});
+DOM.googleBtn.onclick = async () => {
+    try { await signInWithPopup(auth, googleProvider); } 
+    catch (err) { showAlert(err.message, true); }
+};
 
-// 3. استكمال البيانات وحفظ الموقع الجغرافي
-profileForm.addEventListener('submit', async (e) => {
+DOM.profileForm.onsubmit = async (e) => {
     e.preventDefault();
-    const submitBtn = document.getElementById('save-profile-btn');
-    submitBtn.innerText = "جاري تحديد الموقع وحفظ البيانات...";
-    submitBtn.disabled = true;
+    const btn = document.getElementById('save-profile-btn');
+    btn.disabled = true; btn.innerText = "جاري التوثيق...";
 
-    // جلب بيانات النموذج
-    const firstName = document.getElementById('first-name').value;
-    const middleName = document.getElementById('middle-name').value;
-    const lastName = document.getElementById('last-name').value;
-    const phone = document.getElementById('country-code').value + document.getElementById('phone').value;
-    const age = document.getElementById('age').value;
-
-    // دالة لتحديد الموقع الجغرافي
-    const getLocation = () => {
-        return new Promise((resolve, reject) => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => resolve({
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    }),
-                    error => reject(error)
-                );
-            } else {
-                reject(new Error("المتصفح لا يدعم تحديد الموقع"));
-            }
-        });
+    const data = {
+        firstName: document.getElementById('f-name').value.trim(),
+        lastName: document.getElementById('l-name').value.trim(),
+        phone: document.getElementById('c-code').value.trim() + document.getElementById('phone').value.trim(),
+        age: parseInt(document.getElementById('age').value),
+        email: currentUser.email,
+        photoURL: currentUser.photoURL || 'https://via.placeholder.com/150',
+        createdAt: new Date().toISOString(),
+        role: "student",
+        completedLessons: [],
+        pointsTotal: 0,
+        certificates: []
     };
 
+    // جلب الموقع
     try {
-        // محاولة جلب الإحداثيات
-        let locationData = { lat: null, lng: null, country: "غير محدد", city: "غير محدد" };
-        try {
-            const coords = await getLocation();
-            locationData.lat = coords.lat;
-            locationData.lng = coords.lng;
-            
-            // في مشروع حقيقي يتم استخدام API مثل (OpenCage أو Google Maps) لتحويل الإحداثيات لاسم دولة ومدينة.
-            // هنا سنحفظ الإحداثيات كإثبات موقع للسهولة.
-            locationData.country = "تم حفظ الإحداثيات"; 
-        } catch (locError) {
-            console.log("تعذر تحديد الموقع الجغرافي، سيتم الحفظ بدونه.");
-        }
+        const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej));
+        data.location = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    } catch(e) { data.location = { lat: null, lng: null }; }
 
-        // حفظ البيانات في Firestore في مجموعة students
-        const studentData = {
-            firstName: firstName,
-            middleName: middleName,
-            lastName: lastName,
-            fullName: `${firstName} ${middleName} ${lastName}`,
-            phone: phone,
-            age: age,
-            email: currentUser.email,
-            photoURL: currentUser.photoURL, // الصورة من جيميل
-            location: locationData,
-            createdAt: new Date().toISOString()
-        };
-
-        await setDoc(doc(db, "students", currentUser.uid), studentData);
-        
-        alert("تم إنشاء الحساب بنجاح!");
-        showUserDashboard(studentData);
-        
-    } catch (error) {
-        authMessage.innerText = "خطأ في حفظ البيانات: " + error.message;
-        authMessage.style.color = "red";
-        submitBtn.innerText = "حفظ البيانات والدخول للأكاديمية";
-        submitBtn.disabled = false;
+    try {
+        await setDoc(doc(db, "students", currentUser.uid), data);
+        renderDashboard(data);
+    } catch(err) {
+        showAlert("خطأ في الحفظ: " + err.message, true);
+        btn.disabled = false; btn.innerText = "حفظ ودخول الأكاديمية";
     }
-});
+};
 
-// 4. عرض واجهة المستخدم بعد الدخول
-function showUserDashboard(data) {
-    authSection.style.display = 'none';
-    userDashboard.style.display = 'block';
+function renderDashboard(data) {
+    DOM.authSection.style.display = 'none';
+    DOM.dashboard.style.display = 'block';
     
-    document.getElementById('user-photo').src = data.photoURL || 'https://via.placeholder.com/100';
-    document.getElementById('welcome-message').innerText = `أهلاً بك يا ${data.firstName}!`;
+    document.getElementById('user-photo').src = data.photoURL;
+    document.getElementById('welcome-message').innerText = `أهلاً بك، ${data.firstName} ${data.lastName}`;
+    document.getElementById('user-points').innerText = data.pointsTotal || 0;
     
-    if(data.location && data.location.lat) {
-        document.getElementById('user-location').innerText = `تم تسجيل دخولك بناءً على إحداثيات موقعك`;
+    const locText = data.location && data.location.lat ? "✅ تم توثيق موقعك الجغرافي" : "⚠️ لم يتم توثيق الموقع";
+    document.getElementById('user-info').innerText = `${data.email} | ${data.phone} | ${locText}`;
+
+    // عرض الشهادات
+    const certList = document.getElementById('certificates-list');
+    certList.innerHTML = '';
+    
+    if(!data.certificates || data.certificates.length === 0) {
+        certList.innerHTML = '<p style="color: var(--text-muted);">لا يوجد شهادات معتمدة حتى الآن. أكمل كورساتك لتحصل عليها!</p>';
+        return;
     }
+
+    data.certificates.forEach(cert => {
+        const lnk = `https://www.linkedin.com/profile/add?startTask=CERTIFICATION_NAME&name=${encodeURIComponent(cert.courseName)}&organizationName=${encodeURIComponent("أكاديمية عرب فريلانسر")}&issueYear=${new Date(cert.date).getFullYear()}&certUrl=${encodeURIComponent(cert.pdfLink)}&certId=${cert.verifyCode}`;
+        
+        certList.innerHTML += `
+            <div style="background-color: var(--bg-color); padding: 1.5rem; border-radius: 6px; margin-bottom: 1rem; border: 1px solid var(--border-color);">
+                <h4 style="color: var(--primary-color); font-size: 1.2rem; margin-bottom: 0.5rem;">${cert.courseName}</h4>
+                <p style="margin-bottom: 0.5rem;">تاريخ الإصدار: <strong>${new Date(cert.date).toLocaleDateString('ar-EG')}</strong></p>
+                <p style="margin-bottom: 1rem;">كود التحقق: <span style="background: #e5e7eb; padding: 3px 8px; border-radius: 4px; color: #000; font-family: monospace; font-weight: bold;">${cert.verifyCode}</span></p>
+                <div style="display:flex; gap: 10px;">
+                    <a href="${cert.pdfLink}" target="_blank" class="btn btn-secondary">عرض الشهادة (PDF)</a>
+                    <a href="${lnk}" target="_blank" class="btn" style="background-color: #0a66c2; color: #fff;">مشاركة على LinkedIn</a>
+                </div>
+            </div>`;
+    });
 }
 
-// 5. تسجيل الخروج
-logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-});
+DOM.logoutBtn.onclick = () => signOut(auth);
