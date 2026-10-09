@@ -284,6 +284,20 @@ html.theme-switching .feature-card {
 
 .header-actions { display: flex; align-items: center; gap: .6rem; }
 
+.user-chip { display: flex; align-items: center; gap: .5rem; }
+.user-chip-link { display: flex; align-items: center; gap: .5rem; border-radius: 999px; }
+.user-avatar {
+  display: block;
+  width: 30px; height: 30px; flex: 0 0 30px;
+  border-radius: 50%; object-fit: cover;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+}
+.user-name {
+  font-weight: 700; font-size: .9rem;
+  max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
 /* أزرار الأيقونات */
 .theme-toggle, .menu-toggle {
   width: 42px; height: 42px;
