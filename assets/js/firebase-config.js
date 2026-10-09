@@ -10,15 +10,13 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebas
 
 /* 🔴 الصق إعدادات مشروعك هنا من Firebase Console → Project Settings */
 const firebaseConfig = {
-  apiKey:            "PASTE_YOUR_API_KEY",
-  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId:         "YOUR_PROJECT_ID",
-  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId:             "YOUR_APP_ID"
+  apiKey: "AIzaSyD8q05OB-2URf_5z59UD0NBKoA3NXaxncs",
+  authDomain: "academy-os-314c0.firebaseapp.com",
+  projectId: "academy-os-314c0",
+  storageBucket: "academy-os-314c0.firebasestorage.app",
+  messagingSenderId: "790267436938",
+  appId: "1:790267436938:web:bdca5eaa023f7471c5b273",
 };
-
-const app = initializeApp(firebaseConfig);
 
 /* المصادقة */
 export const auth = getAuth(app);
