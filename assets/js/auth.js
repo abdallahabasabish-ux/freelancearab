@@ -1,6 +1,6 @@
 /* ============================================================
    auth.js — خدمة المصادقة المركزية
-   - أدوات مشتركة: انتظار المصادقة، ترجمة الأخطاء، الجلسة الواحدة
+  - أدوات مشتركة: انتظار المصادقة وترجمة الأخطاء
    - حماية الصفحات: requireAuth
    - واجهة الهيدر: initHeaderAuth + تسجيل الخروج
    ============================================================ */
@@ -12,12 +12,6 @@ import {
 import {
   doc, getDoc, setDoc, serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* ---------- مفاتيح الجلسة ---------- */
-const SESSION_KEY = 'afa-session';
-
-export const getSessionId    = () => localStorage.getItem(SESSION_KEY);
-export const endSessionLocal = () => localStorage.removeItem(SESSION_KEY);
 
 /* ---------- انتظار جاهزية حالة المصادقة ---------- */
 export function waitForAuth() {
@@ -45,41 +39,13 @@ const AUTH_ERRORS = {
 };
 export const authErrorAr = (code) => AUTH_ERRORS[code] || 'حدث خطأ غير متوقع — حاول مجدداً.';
 
-/* ============================================================
-   الجلسة الواحدة (منع مشاركة الحساب)
-   عند كل دخول: يُولَّد Session ID جديد ويُحفظ محلياً وفي
-   users/{uid}.activeSession — أي جهاز آخر يُطرد تلقائياً.
-   ============================================================ */
-export async function startSession(user) {
-  const sessionId = crypto.randomUUID();
-  localStorage.setItem(SESSION_KEY, sessionId);
-  try {
-    await setDoc(doc(db, 'users', user.uid), {
-      uid: user.uid,
-      activeSession: sessionId,
-      lastLoginAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-  } catch { /* سيتم التصحيح عند أول مزامنة */ }
-  return sessionId;
-}
-
 export async function getProfile(uid) {
   const snap = await getDoc(doc(db, 'users', uid));
   return snap.exists() ? snap.data() : null;
 }
 
-export async function validateSession(user) {
-  const profile = await getProfile(user.uid);
-  const stored  = profile?.activeSession;
-  const local   = getSessionId();
-  if (stored && stored !== local) return { ok: false, profile };
-  return { ok: true, profile };
-}
-
 /* ---------- تسجيل الخروج ---------- */
 export async function logout() {
-  endSessionLocal();
   try { await signOut(auth); } catch { /* تجاهل */ }
   location.replace('/');
 }
@@ -94,7 +60,7 @@ export function bindLogout() {
 
 /* ============================================================
    حماية الصفحات
-   التسلسل: مسجّل؟ → بريد مُتحقق؟ → جلسة صالحة؟ → ملف مكتمل؟
+  التسلسل: مسجّل؟ → بريد مُتحقق؟ → ملف مكتمل؟
    ============================================================ */
 export async function requireAuth({ allowIncomplete = false } = {}) {
   const user = await waitForAuth();
@@ -102,8 +68,7 @@ export async function requireAuth({ allowIncomplete = false } = {}) {
 
   if (!user.emailVerified) { location.replace('/login.html?state=verify'); return null; }
 
-  const { ok, profile } = await validateSession(user);
-  if (!ok) { location.replace('/login.html?state=session'); return null; }
+  const profile = await getProfile(user.uid);
 
   if (!profile?.profileCompleted && !allowIncomplete) {
     location.replace('/profile.html');
@@ -139,7 +104,6 @@ export async function loginWithGoogle() {
     emailVerified: true,
     updatedAt: serverTimestamp()
   }, { merge: true });
-  await startSession(user);
   return user;
 }
 

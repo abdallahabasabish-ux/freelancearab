@@ -11,7 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
-  initAuthGate, authErrorAr, startSession, routeAuthedUser,
+  initAuthGate, authErrorAr, routeAuthedUser,
   loginWithGoogle, logout
 } from './auth.js';
 
@@ -40,7 +40,6 @@ function startCooldown(btn, secs) {
 
 /* ---------- رسائل حالة الرابط (?state=...) ---------- */
 const state = new URLSearchParams(location.search).get('state');
-if (state === 'session') toast('انتهت جلستك — تم تسجيل الدخول بهذا الحساب من جهاز آخر.', 'warning');
 if (state === 'verify')  toast('يجب تأكيد بريدك الإلكتروني أولاً.', 'warning');
 
 /* ---------- بوابة: مستخدم مسجّل مسبقاً؟ ---------- */
@@ -61,6 +60,7 @@ document.querySelectorAll('[data-pw-toggle]').forEach((btn) => {
 
 /* ---------- لوحة التحقق ---------- */
 let pollTimer = null;
+let verificationFinished = false;
 function openVerifyPanel(email) {
   $('#verifyEmail').textContent = email || '';
   showPanel('panelVerify');
@@ -80,10 +80,11 @@ function openVerifyPanel(email) {
 function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 
 async function finishVerification(user) {
+  if (verificationFinished) return;
+  verificationFinished = true;
   try {
     await updateDoc(doc(db, 'users', user.uid), { emailVerified: true, updatedAt: serverTimestamp() });
   } catch { /* تجاهل */ }
-  await startSession(user);
   toast('تم تأكيد بريدك بنجاح 🎉', 'success');
   setTimeout(() => routeAuthedUser(user), 800);
 }
@@ -138,7 +139,6 @@ async function finishVerification(user) {
       return;
     }
 
-    await startSession(cred.user);
     await routeAuthedUser(cred.user);
   } catch (err) {
     toast(authErrorAr(err.code), 'error');

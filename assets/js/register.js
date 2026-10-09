@@ -11,7 +11,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
-  initAuthGate, authErrorAr, startSession, loginWithGoogle, logout
+  initAuthGate, authErrorAr, loginWithGoogle, logout
 } from './auth.js';
 
 const $ = (s) => document.querySelector(s);
@@ -37,6 +37,7 @@ function openVerifyPanel(email) {
 }
 
 let pollTimer = null;
+let verificationFinished = false;
 function startPolling() {
   stopPolling();
   /* فحص تلقائي كل 6 ثوانٍ — رخيص (تحديث توكن فقط) */
@@ -57,10 +58,11 @@ function startPolling() {
 function stopPolling() { if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
 
 async function finishVerification(user) {
+  if (verificationFinished) return;
+  verificationFinished = true;
   try {
     await updateDoc(doc(db, 'users', user.uid), { emailVerified: true });
   } catch { /* تجاهل */ }
-  await startSession(user);
   toast('تم تأكيد بريدك بنجاح 🎉', 'success');
   setTimeout(() => location.replace('/profile.html'), 800);
 }
