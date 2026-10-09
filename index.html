@@ -1,78 +1,340 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الملف الشخصي | أكاديمية عرب فريلانسر</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO (سيتم تغيير العنوان والوصف ديناميكياً لكل كورس في المرحلة 3) -->
+  <title>أكاديمية عرب فريلانسر | تعلم مهارات العمل الحر مجاناً</title>
+  <meta name="description" content="منصة عربية مجانية لتعليم الفريلانسينج: كورسات احترافية، شهادات إتمام، تتبع للتقدم، وتعلم بسرعتك — من أي مكان في العالم العربي.">
+  <link rel="canonical" href="https://courses.freelancearab.com/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="أكاديمية عرب فريلانسر">
+  <meta property="og:description" content="تعلم مهارات العمل الحر مجاناً — كورسات عربية بشهادات إتمام.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://courses.freelancearab.com/">
+  <meta property="og:image" content="https://courses.freelancearab.com/assets/icons/icon-512.png">
+
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="عرب فريلانسر">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <link rel="apple-touch-icon" href="/assets/icons/icon-192.png">
+
+  <!-- تطبيق الوضع المحفوظ فوراً لمنع وميض الألوان (يُضاف لرأس كل صفحة) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) { /* تجاهل */ }
+    })();
+  </script>
+
+  <!-- الخط -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/style.css">
 </head>
 <body>
-    <header>
-        <div class="container nav-container">
-            <a href="/" class="logo">أكاديمية عرب فريلانسر</a>
-            <nav>
-                <button id="theme-toggle" class="btn" style="background:none; border:1px solid var(--border-color); color:var(--text-color);">🌙</button>
-            </nav>
-        </div>
-    </header>
 
-    <div class="container" style="max-width: 800px; margin-top: 2rem;">
-        
-        <!-- قسم المصادقة -->
-        <div id="auth-section" class="card" style="max-width: 500px; margin: 0 auto;">
-            <h2 style="color: var(--primary-color); margin-bottom: 1rem; text-align: center;">إنشاء حساب / تسجيل دخول</h2>
-            <p style="color: var(--text-muted); text-align: center; margin-bottom: 1.5rem;">انضم إلينا لتبدأ مسيرتك في العمل الحر.</p>
+  <!-- ================= الهيدر ================= -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <img src="/assets/icons/icon.svg" alt="شعار أكاديمية عرب فريلانسر" class="brand-logo" width="42" height="42">
+        <span class="brand-name">أكاديمية <b>عرب فريلانسر</b></span>
+      </a>
 
-            <button id="google-login-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">تسجيل الدخول باستخدام Google</button>
-            <div id="auth-alert" class="alert"></div>
+      <nav class="main-nav" id="mainNav" aria-label="التنقل الرئيسي">
+        <a href="/" class="nav-link active">الرئيسية</a>
+        <a href="/courses.html" class="nav-link">الكورسات</a>
+        <a href="/dashboard.html" class="nav-link">لوحتي</a>
+        <a href="/verify.html" class="nav-link">التحقق من شهادة</a>
+      </nav>
 
-            <form id="profile-form" style="display: none; margin-top: 1.5rem;">
-                <h3 style="margin-bottom: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">استكمال بياناتك (لمرة واحدة)</h3>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="f-name" placeholder="الاسم الأول" required>
-                    <input type="text" id="l-name" placeholder="اسم العائلة" required>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="c-code" placeholder="كود الدولة (+20)" style="width: 30%;" required>
-                    <input type="tel" id="phone" placeholder="رقم الهاتف" style="width: 70%;" required>
-                </div>
-                <input type="number" id="age" placeholder="العمر" min="12" max="99" required>
-                <p style="font-size: 0.85rem; color: var(--secondary-color); margin-bottom: 1rem;">ملاحظة: سيتم طلب إذن تحديد الموقع الجغرافي لتوثيق الحساب.</p>
-                <button type="submit" id="save-profile-btn" class="btn btn-secondary" style="width: 100%;">حفظ ودخول الأكاديمية</button>
-            </form>
-        </div>
-
-        <!-- قسم لوحة الطالب (يظهر بعد الدخول) -->
-        <div id="user-dashboard" style="display: none;">
-            <div class="card" style="text-align: center; margin-bottom: 2rem;">
-                <img id="user-photo" src="" alt="الصورة الشخصية" style="width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary-color); margin-bottom: 1rem;">
-                <h2 id="welcome-message" style="color: var(--primary-color); margin-bottom: 0.5rem;"></h2>
-                <p id="user-info" style="color: var(--text-muted); margin-bottom: 1rem;"></p>
-                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1.5rem;">النقاط المكتسبة: <span id="user-points" style="color: var(--secondary-color);">0</span> 🏆</p>
-                
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <a href="courses.html" class="btn btn-primary">تصفح الكورسات</a>
-                    <button id="logout-btn" class="btn btn-danger">تسجيل خروج</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3 style="border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; margin-bottom: 1.5rem; display: inline-block;">شهاداتي المعتمدة</h3>
-                <div id="certificates-list">
-                    <p style="color: var(--text-muted);">جاري تحميل الشهادات...</p>
-                </div>
-            </div>
-        </div>
-
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-pressed="false" aria-label="التبديل إلى الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <a href="/login.html" class="btn btn-outline btn-sm btn-login">دخول</a>
+        <a href="/register.html" class="btn btn-accent btn-sm">ابدأ مجاناً</a>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
     </div>
+  </header>
 
-    <script type="module" src="auth.js"></script>
-    <script>
-        const tt = document.getElementById('theme-toggle');
-        let th = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', th);
-        tt.onclick = () => { th = th === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', th); localStorage.setItem('theme', th); };
-    </script>
+  <main>
+    <!-- ================= Hero ================= -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <span class="hero-badge">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-graduation-cap"></use></svg>
+            منصة عربية 100% — مجانية بالكامل
+          </span>
+          <h1>تعلّم مهارات <span class="highlight">العمل الحر</span> وانطلق في سوق الفريلانس</h1>
+          <p class="lead">كورسات عربية احترافية بأسلوب عملي: دروس مرتبة، ملفات قابلة للتحميل، تتبع دقيق لتقدمك، وشهادة إتمام تحصل عليها بعد إكمال كل كورس.</p>
+          <div class="hero-cta">
+            <a href="/register.html" class="btn btn-accent btn-lg">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-zap"></use></svg>
+              ابدأ التعلم مجاناً
+            </a>
+            <a href="/courses.html" class="btn btn-light btn-lg">
+              استعرض الكورسات
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-arrow-left"></use></svg>
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg>
+            <div class="stat-label">كورسات متخصصة</div>
+          </div>
+          <div class="stat">
+            <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+            <div class="stat-label">شهادات إتمام موثقة</div>
+          </div>
+          <div class="stat">
+            <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-clock"></use></svg>
+            <div class="stat-label">تعلم بسرعتك الخاصة</div>
+          </div>
+          <div class="stat">
+            <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-users"></use></svg>
+            <div class="stat-label">مجتمع فريلانسرز عرب</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= الميزات ================= -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-target"></use></svg>
+            لماذا نحن؟
+          </span>
+          <h2>كل ما تحتاجه لتبدأ الاحتراف</h2>
+          <p>بنينا المنصة لتكون تجربة تعليمية متكاملة، لا مجرد فيديوهات مبعثرة.</p>
+        </div>
+
+        <div class="features-grid">
+          <article class="feature-card">
+            <div class="feature-icon accent">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-map-pin"></use></svg>
+            </div>
+            <h3>تعلم من أي مكان</h3>
+            <p>وصول كامل من هاتفك أو حاسوبك، مع إمكانية تثبيت المنصة كتطبيق على جهازك.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-target"></use></svg>
+            </div>
+            <h3>تتبع دقيق لتقدمك</h3>
+            <p>شريط تقدم لكل كورس، وحفظ تلقائي للدروس التي أكملتها في حسابك.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon accent">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sticky-note"></use></svg>
+            </div>
+            <h3>ملاحظات ذكية</h3>
+            <p>اكتب ملاحظاتك أثناء المشاهدة وترتبط تلقائياً بلحظة الفيديو التي كتبتها فيها.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-zap"></use></svg>
+            </div>
+            <h3>نقاط وتحفيز مستمر</h3>
+            <p>اجمع نقاطاً مع كل درس تكمله وحافظ على حماسك حتى نهاية الكورس.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon accent">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+            </div>
+            <h3>شهادة موثقة قابلة للتحقق</h3>
+            <p>شهادة بكود تحقق فريد يمكن لأي شركة التحقق منها عبر صفحة التحقق العامة.</p>
+          </article>
+
+          <article class="feature-card">
+            <div class="feature-icon">
+              <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-shield-check"></use></svg>
+            </div>
+            <h3>مجاني وآمن</h3>
+            <p>حسابك محمي بجلسة واحدة وتحقق بريدي، ومحتواك التعليمي ملكك وحدك.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= الكورسات (تُعبأ ديناميكياً في المرحلة 3) ================= -->
+    <section class="section section-alt" id="courses">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg>
+            الكورسات
+          </span>
+          <h2>ابدأ من الكورس المناسب لك</h2>
+          <p>يتم تحميل أحدث الكورسات المنشورة هنا تلقائياً.</p>
+        </div>
+
+        <div class="courses-grid" id="coursesGrid">
+          <!-- هياكل تحميل مؤقتة — تُستبدل بالكورسات الحقيقية في المرحلة 3 -->
+          <div class="course-card card">
+            <div class="course-media skeleton"></div>
+            <div class="course-body">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </div>
+          </div>
+          <div class="course-card card">
+            <div class="course-media skeleton"></div>
+            <div class="course-body">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </div>
+          </div>
+          <div class="course-card card">
+            <div class="course-media skeleton"></div>
+            <div class="course-body">
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+              <div class="skeleton skeleton-text"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= كيف تبدأ ================= -->
+    <section class="section" id="how-it-works">
+      <div class="container">
+        <div class="section-head">
+          <span class="eyebrow">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check-circle"></use></svg>
+            خطواتك
+          </span>
+          <h2>كيف تبدأ رحلتك؟</h2>
+        </div>
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-num">1</div>
+            <h3>أنشئ حسابك المجاني</h3>
+            <p>سجل خلال دقيقة بإيميلك أو حساب Google وأكمل ملفك الشخصي.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">2</div>
+            <h3>اختر كورسك وابدأ</h3>
+            <p>شاهد الدروس مرتبة، حمّل الملفات، ودوّن ملاحظاتك على الفيديو مباشرة.</p>
+          </div>
+          <div class="step-card">
+            <div class="step-num">3</div>
+            <h3>أكمل واحصل على شهادتك</h3>
+            <p>أكمل كل الدروس ليتم إصدار شهادتك بكود تحقق فوري قابل للمشاركة.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container">
+        <div class="cta-band">
+          <h2>جاهز تبدأ رحلتك في العمل الحر؟</h2>
+          <p>انضم الآن مجاناً — كل ما تحتاجه هو رغبتك في التعلم.</p>
+          <a href="/register.html" class="btn btn-accent btn-lg">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-user-plus"></use></svg>
+            أنشئ حسابك المجاني الآن
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ================= الفوتر ================= -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a href="/" class="brand">
+            <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+            <span class="brand-name">أكاديمية <b>عرب فريلانسر</b></span>
+          </a>
+          <p class="footer-about">منصة تعليمية عربية هدفها تأهيل الشباب العربي لمواجهة سوق العمل الحر بمهارات حقيقية وشهادات موثقة.</p>
+          <div class="social-row">
+            <a href="#" aria-label="قناة اليوتيوب">
+              <svg class="icon icon-fill" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-youtube"></use></svg>
+            </a>
+            <a href="#" aria-label="صفحة لينكدإن">
+              <svg class="icon icon-fill" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-linkedin"></use></svg>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h4>روابط سريعة</h4>
+          <ul class="footer-links">
+            <li><a href="/">الرئيسية</a></li>
+            <li><a href="/courses.html">الكورسات</a></li>
+            <li><a href="/dashboard.html">لوحة الطالب</a></li>
+            <li><a href="/verify.html">التحقق من شهادة</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>الحساب</h4>
+          <ul class="footer-links">
+            <li><a href="/login.html">تسجيل الدخول</a></li>
+            <li><a href="/register.html">إنشاء حساب</a></li>
+            <li><a href="/certificates.html">شهاداتي</a></li>
+            <li><a href="/notifications.html">الإشعارات</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4>تواصل معنا</h4>
+          <ul class="footer-contact">
+            <li>
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
+              <span dir="ltr">support@freelancearab.com</span>
+            </li>
+            <li>
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-map-pin"></use></svg>
+              نعمل عن بُعد — نخدم كل الدول العربية
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>© <span data-year></span> أكاديمية عرب فريلانسر — جميع الحقوق محفوظة.</p>
+        <p>صُنعت بشغف لدعم المجتمع العربي.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
 </body>
 </html>
