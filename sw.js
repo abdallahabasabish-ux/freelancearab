@@ -8,7 +8,7 @@
    - طلبات Firebase/Auth: تمرير مباشر دون تخزين أبداً
    ============================================================ */
 
-const VERSION       = 'v1.0.0';
+const VERSION = 'v1.0.1';
 const STATIC_CACHE  = `afa-static-${VERSION}`;
 const PAGES_CACHE   = `afa-pages-${VERSION}`;
 const IMAGES_CACHE  = `afa-images-${VERSION}`;
@@ -143,7 +143,10 @@ async function staleWhileRevalidate(request, cacheName) {
   const fetchPromise = fetch(request)
     .then((response) => {
       if (response && response.ok) {
-        caches.open(cacheName).then((cache) => cache.put(request, response.clone()));
+        const copy = response.clone();
+        caches.open(cacheName)
+          .then((cache) => cache.put(request, copy))
+          .catch(() => {});
       }
       return response;
     })
