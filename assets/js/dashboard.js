@@ -25,16 +25,20 @@ async function main({ user, profile }) {
   /* التقدم + الشهادات (استعلام الشهادات جاهز للمرحلة 5) */
   const [progressList, certsSnap] = await Promise.all([
     fetchAllProgress(user.uid).catch(() => []),
-    getDocs(query(collection(db, 'certificates'), where('uid', '==', user.uid)))
+    getDocs(query(collection(db, 'certificates'), where('uid', '==', user.uid), where('status', '==', 'active')))
       .catch(() => ({ docs: [] }))
   ]);
 
   $('#statCourses').textContent = progressList.length;
-  $('#statLessons').textContent =
-    progressList.reduce((n, p) => n + (p.completedLessons?.length || 0), 0);
+  const completedLessons = progressList.reduce((n, p) => n + (p.completedLessons?.length || 0), 0);
+  $('#statLessons').textContent = completedLessons;
   $('#statCerts').textContent = certsSnap.docs.length;
 
-  if (!progressList.length) { $('#dashEmpty').hidden = false; return; }
+  if (!progressList.length) {
+    renderInsights([], { points: Number(profile?.points || 0), completedLessons, certificates: certsSnap.docs.length });
+    $('#dashEmpty').hidden = false;
+    return;
+  }
 
   /* ربط كل تقدم ببيانات كورسه (قراءة/كورس) */
   const items = (await Promise.all(progressList.map(async (p) => {
@@ -44,6 +48,7 @@ async function main({ user, profile }) {
     } catch { return null; }
   }))).filter(Boolean);
 
+  renderInsights(items, { points: Number(profile?.points || 0), completedLessons, certificates: certsSnap.docs.length });
   if (!items.length) { $('#dashEmpty').hidden = false; return; }
 
   /* بطاقة المتابعة: أول كورس غير مكتمل (الأحدث نشاطاً) */
@@ -53,6 +58,58 @@ async function main({ user, profile }) {
   /* شبكة كورساتي */
   const grid = $('#myCourses');
   items.forEach(({ p, c }) => grid.appendChild(renderMyCourse(p, c)));
+}
+
+function renderInsights(items, totals) {
+  const chart = $('#courseProgressChart');
+  const levels = $('#courseLevels');
+  const average = items.length
+    ? Math.round(items.reduce((sum, item) => sum + getProgressPercent(item.p), 0) / items.length)
+    : 0;
+  $('#progressAverage').textContent = `${average}%`;
+
+  chart.innerHTML = items.length
+    ? items.map(({ p, c }) => {
+        const percent = getProgressPercent(p);
+        const title = escapeHtml(c.title || 'كورس');
+        return `
+          <div class="progress-chart-row" role="listitem">
+            <div class="chart-row-label"><span>${title}</span><b>${percent}%</b></div>
+            <div class="chart-track" role="progressbar" aria-label="تقدم ${title}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${percent}">
+              <div class="chart-fill" style="width:${percent}%"></div>
+            </div>
+          </div>`;
+      }).join('')
+    : '<p class="insight-empty">ابدأ كورساً لعرض تقدمك هنا.</p>';
+
+  levels.innerHTML = items.length
+    ? items.map(({ p, c }) => {
+        const percent = getProgressPercent(p);
+        const level = percent === 100 ? 'مكتمل' : percent >= 70 ? 'متقدم' : percent >= 30 ? 'متمكن' : 'مبتدئ';
+        return `<div class="course-level-row"><span class="course-level-name">${escapeHtml(c.title || 'كورس')}</span><span class="course-level-tag">${level} · ${percent}%</span></div>`;
+      }).join('')
+    : '<p class="insight-empty">ستظهر مستوياتك بعد بدء أول كورس.</p>';
+
+  const completedCourses = items.filter(({ p }) => getProgressPercent(p) === 100).length;
+  const achievements = [
+    { icon: 'i-zap', title: 'بداية الرحلة', detail: 'أكمل أول درس', earned: totals.completedLessons >= 1 },
+    { icon: 'i-check-circle', title: 'مثابر', detail: 'أكمل 10 دروس', earned: totals.completedLessons >= 10 },
+    { icon: 'i-graduation-cap', title: 'مسار مكتمل', detail: 'أكمل كورساً', earned: completedCourses >= 1 },
+    { icon: 'i-award', title: 'صاحب شهادة', detail: 'احصل على شهادة', earned: totals.certificates >= 1 },
+    { icon: 'i-star', title: 'جامع النقاط', detail: 'اجمع 100 نقطة', earned: totals.points >= 100 }
+  ];
+  const earnedCount = achievements.filter((item) => item.earned).length;
+  $('#achievementCount').textContent = `${earnedCount} / ${achievements.length}`;
+  $('#achievementBadges').innerHTML = achievements.map((item) => `
+    <div class="achievement-tile ${item.earned ? 'earned' : ''}"${item.earned ? '' : ' aria-label="شارة مقفلة: ' + item.title + '"'}>
+      <span class="achievement-icon"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#${item.icon}"></use></svg></span>
+      <span class="achievement-copy"><b>${item.title}</b><span>${item.detail}</span></span>
+    </div>`).join('');
+}
+
+function getProgressPercent(progress) {
+  const value = Number(progress?.progressPercent) || 0;
+  return Math.min(100, Math.max(0, Math.round(value)));
 }
 
 /* ---------- بطاقة المتابعة ---------- */

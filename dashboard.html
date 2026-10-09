@@ -92,6 +92,40 @@
         </div>
       </div>
 
+      <div class="dash-insights">
+        <section class="insight-panel card" aria-labelledby="progressChartTitle">
+          <div class="insight-head">
+            <h2 id="progressChartTitle" class="dash-section-title">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-chart"></use></svg>
+              مخطط التقدم
+            </h2>
+            <span class="insight-total" id="progressAverage">0%</span>
+          </div>
+          <div class="progress-chart" id="courseProgressChart" aria-live="polite"></div>
+        </section>
+
+        <section class="insight-panel card" aria-labelledby="achievementTitle">
+          <div class="insight-head">
+            <h2 id="achievementTitle" class="dash-section-title">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+              شاراتي
+            </h2>
+            <span class="insight-count" id="achievementCount">0 / 5</span>
+          </div>
+          <div class="achievement-grid" id="achievementBadges"></div>
+        </section>
+
+        <section class="insight-panel card" aria-labelledby="courseLevelTitle">
+          <div class="insight-head">
+            <h2 id="courseLevelTitle" class="dash-section-title">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-target"></use></svg>
+              مستواي في المسارات
+            </h2>
+          </div>
+          <div class="course-level-list" id="courseLevels" aria-live="polite"></div>
+        </section>
+      </div>
+
       <!-- أكمل من حيث توقفت -->
       <section id="continueSection" hidden>
         <h2 class="dash-section-title">
