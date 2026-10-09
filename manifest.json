@@ -1,0 +1,37 @@
+{
+  "name": "أكاديمية عرب فريلانسر",
+  "short_name": "عرب فريلانسر",
+  "id": "/",
+  "description": "منصة تعليمية عربية مجانية لتأهيل الشباب لمواجهة سوق العمل الحر بمهارات حقيقية",
+  "dir": "rtl",
+  "lang": "ar",
+  "start_url": "/index.html?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a101f",
+  "theme_color": "#1e3a8a",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "/assets/icons/icon-192.png",    "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/icon-512.png",    "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icons/maskable-512.png","sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "استعرض الكورسات",
+      "url": "/courses.html",
+      "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "لوحة الطالب",
+      "url": "/dashboard.html",
+      "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "التحقق من شهادة",
+      "url": "/verify.html",
+      "icons": [{ "src": "/assets/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
