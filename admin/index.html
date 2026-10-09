@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة الإدارة | أكاديمية عرب فريلانسر</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+  <header class="site-header admin-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/admin/index.html" class="brand">
+        <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+        <span class="brand-name">لوحة <b>الإدارة</b></span>
+        <span class="admin-tag">ADMIN</span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="تنقل الإدارة">
+        <a href="/admin/index.html" class="nav-link active">نظرة عامة</a>
+        <a href="/admin/courses-manage.html" class="nav-link">الكورسات</a>
+        <a href="/admin/students-manage.html" class="nav-link">الطلاب</a>
+        <a href="/" class="nav-link">الموقع</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <button class="icon-btn" data-logout aria-label="تسجيل الخروج" title="تسجيل الخروج">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-log-out"></use></svg>
+        </button>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-page">
+    <div class="container">
+
+      <!-- هيكل تحميل -->
+      <div id="adminSkeleton">
+        <div class="stats-grid">
+          <div class="skeleton" style="height:100px; border-radius:var(--radius-lg);"></div>
+          <div class="skeleton" style="height:100px; border-radius:var(--radius-lg);"></div>
+          <div class="skeleton" style="height:100px; border-radius:var(--radius-lg);"></div>
+          <div class="skeleton" style="height:100px; border-radius:var(--radius-lg);"></div>
+        </div>
+        <div class="skeleton" style="height:260px; border-radius:var(--radius-lg);"></div>
+      </div>
+
+      <!-- غير مصرح -->
+      <div class="admin-error" id="deniedState" hidden>
+        <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-lock"></use></svg>
+        <h2>هذه الصفحة للإدارة فقط</h2>
+        <p>حسابك لا يملك صلاحيات الوصول للوحة التحكم.</p>
+        <a href="/" class="btn btn-primary">العودة للموقع</a>
+      </div>
+
+      <!-- المحتوى -->
+      <div id="adminContent" hidden>
+        <div class="admin-page-head">
+          <div>
+            <h1>نظرة عامة</h1>
+            <p>ملخص حي لحالة الأكاديمية.</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box card">
+            <div class="stat-ico a"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-users"></use></svg></div>
+            <div><div class="v" id="stStudents">—</div><div class="l">إجمالي الطلاب</div></div>
+          </div>
+          <div class="stat-box card">
+            <div class="stat-ico b"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg></div>
+            <div><div class="v" id="stCourses">—</div><div class="l">الكورسات</div></div>
+          </div>
+          <div class="stat-box card">
+            <div class="stat-ico c"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg></div>
+            <div><div class="v" id="stCerts">—</div><div class="l">شهادات صادرة</div></div>
+          </div>
+          <div class="stat-box card">
+            <div class="stat-ico d"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-zap"></use></svg></div>
+            <div><div class="v" id="stActive">—</div><div class="l">طلاب نشطون (30 يوم)</div></div>
+          </div>
+        </div>
+
+        <div class="admin-two-col">
+          <!-- إجراءات سريعة -->
+          <section class="card admin-panel">
+            <h2>
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-zap"></use></svg>
+              إجراءات سريعة
+            </h2>
+            <div class="quick-links">
+              <a href="/admin/courses-manage.html">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-plus"></use></svg>
+                إضافة كورس جديد
+              </a>
+              <a href="/admin/students-manage.html">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+                إصدار شهادة لطالب
+              </a>
+              <a href="/admin/students-manage.html">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-bell"></use></svg>
+                إرسال إشعار داخلي
+              </a>
+              <a href="/admin/students-manage.html">
+                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg>
+                تصدير بيانات الطلاب (CSV)
+              </a>
+            </div>
+          </section>
+
+          <!-- آخر الشهادات -->
+          <section class="card admin-panel">
+            <h2>
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+              أحدث الشهادات الصادرة
+            </h2>
+            <div class="rows-stack" id="recentCerts"></div>
+            <p class="mini-empty" id="noCerts" hidden>لم تصدر أي شهادات بعد.</p>
+          </section>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+  <script type="module" src="/assets/js/admin-stats.js"></script>
+</body>
+</html>
