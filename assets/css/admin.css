@@ -1,0 +1,184 @@
+/* ============================================================
+   admin.css — لوحة تحكم الإدارة
+   ============================================================ */
+
+[hidden] { display: none !important; }
+
+/* ---------- حالات عامة (نسخة للوحة) ---------- */
+.admin-empty, .admin-error { text-align: center; padding: 3rem 1rem; }
+.admin-empty .icon-xl, .admin-error .icon-xl { margin: 0 auto 1rem; color: var(--text-3); }
+.admin-error .icon-xl { color: var(--accent); }
+.admin-empty h3, .admin-error h2 { margin-bottom: .5rem; }
+.admin-empty p, .admin-error p { color: var(--text-2); margin-bottom: 1.25rem; }
+
+.mini-empty { font-size: .82rem; color: var(--text-3); padding: .4rem .2rem; }
+
+/* ---------- ترويسة الإدارة ---------- */
+.admin-header { border-bottom: 1px solid var(--border); }
+.admin-tag {
+  font-size: .72rem; font-weight: 900;
+  background: var(--accent); color: #fff;
+  padding: .2rem .6rem; border-radius: 6px;
+  margin-inline-start: .5rem;
+}
+
+.admin-page { padding-block: 2rem 3.5rem; }
+.admin-page-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap; margin-bottom: 1.75rem;
+}
+.admin-page-head h1 { font-size: clamp(1.3rem, 2.8vw, 1.7rem); }
+.admin-page-head p { color: var(--text-2); font-size: .9rem; }
+
+/* ---------- بطاقات الإحصائيات ---------- */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1rem; margin-bottom: 2.25rem;
+}
+.stat-box { padding: 1.25rem; display: flex; align-items: center; gap: .9rem; }
+.stat-ico {
+  width: 50px; height: 50px; flex-shrink: 0;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+}
+.stat-ico.a { background: var(--accent-soft);  color: var(--accent); }
+.stat-ico.b { background: var(--primary-soft); color: var(--primary-ink); }
+.stat-ico.c { background: var(--success-soft); color: var(--success); }
+.stat-ico.d { background: var(--info-soft);    color: var(--info); }
+.stat-box .v { font-size: 1.5rem; font-weight: 900; line-height: 1.2; }
+.stat-box .l { font-size: .8rem; color: var(--text-2); }
+
+@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------- شبكتا الأدوات والروابط ---------- */
+.admin-two-col { display: grid; grid-template-columns: 1fr 1.4fr; gap: 1.5rem; align-items: start; }
+@media (max-width: 900px) { .admin-two-col { grid-template-columns: 1fr; } }
+
+.admin-panel { padding: 1.5rem; }
+.admin-panel h2 {
+  font-size: 1.05rem; margin-bottom: 1.1rem;
+  display: flex; align-items: center; gap: .5rem;
+}
+.admin-panel h2 .icon { color: var(--accent); }
+
+.quick-links { display: grid; gap: .6rem; }
+.quick-links a {
+  display: flex; align-items: center; gap: .7rem;
+  padding: .85rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-weight: 700; font-size: .92rem;
+  transition: border-color var(--transition), background var(--transition);
+}
+.quick-links a:hover { border-color: var(--accent); background: var(--accent-soft); }
+.quick-links .icon { color: var(--accent); }
+
+/* ---------- قوائم الصفوف (كورسات/طلاب) ---------- */
+.rows-stack { display: flex; flex-direction: column; gap: .75rem; }
+
+.row-card { padding: 1.1rem 1.25rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+.row-main { flex: 1; min-width: 220px; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; }
+.row-title { font-weight: 800; font-size: .98rem; }
+.row-meta { width: 100%; font-size: .8rem; color: var(--text-3); display: flex; gap: 1rem; flex-wrap: wrap; }
+.row-meta span { display: inline-flex; align-items: center; gap: .35rem; }
+.row-meta .icon { color: var(--accent); }
+
+.row-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+.row-avatar {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%; object-fit: cover;
+  border: 2px solid var(--border); background: var(--surface-2);
+}
+
+/* شريط أدوات الطلاب */
+.list-toolbar { display: flex; gap: .75rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.list-toolbar .search-box { flex: 1; min-width: 220px; position: relative; }
+.list-toolbar .search-box .icon {
+  position: absolute; inset-inline-start: .9rem; top: 50%;
+  transform: translateY(-50%); color: var(--text-3); pointer-events: none;
+}
+.list-toolbar .search-box .input { padding-inline-start: 2.7rem; }
+
+/* ---------- محرر الكورسات ---------- */
+.editor-form { padding: 1.75rem; }
+.form-section-title {
+  font-size: 1rem; margin: 1.75rem 0 1rem;
+  display: flex; align-items: center; gap: .5rem;
+  padding-top: 1.25rem; border-top: 1px dashed var(--border);
+}
+.form-section-title:first-of-type { border-top: 0; padding-top: 0; margin-top: 0; }
+.form-section-title .icon { color: var(--accent); }
+.form-hint { font-size: .8rem; color: var(--text-3); margin-top: -.6rem; margin-bottom: 1rem; }
+
+.editor-actions {
+  display: flex; gap: .7rem; justify-content: flex-start; flex-wrap: wrap;
+  margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px dashed var(--border);
+}
+
+/* بطاقات الفصول */
+.module-card {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.module-head { display: flex; gap: .6rem; align-items: center; margin-bottom: .85rem; }
+.module-head .input { flex: 1; font-weight: 800; background: var(--surface); }
+.module-head .module-num {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 9px; background: var(--primary-soft); color: var(--primary-ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .82rem; font-weight: 900;
+}
+
+.module-lessons { display: flex; flex-direction: column; gap: .6rem; }
+
+/* بطاقات الدروس */
+.lesson-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: .75rem;
+}
+.lesson-row1 { display: flex; gap: .5rem; align-items: center; }
+.lesson-row1 .input:first-child { flex: 1; }
+.lesson-row1 .l-dur { width: 90px; flex-shrink: 0; }
+
+.lesson-card .chev { transition: transform .25s; }
+.lesson-card.open .chev { transform: rotate(180deg); }
+
+.lesson-extra { margin-top: .85rem; padding-top: .85rem; border-top: 1px dashed var(--border); }
+.lesson-extra .field { margin-bottom: .9rem; }
+.lesson-extra .label { font-size: .8rem; }
+
+.att-row { display: flex; gap: .5rem; margin-bottom: .5rem; }
+.att-row .input:first-child { max-width: 200px; }
+
+/* ---------- النوافذ (توسيع النظام العام) ---------- */
+.modal.modal-lg { max-width: 640px; }
+.modal h3.modal-title { font-size: 1.15rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: .55rem; }
+.modal h3.modal-title .icon { color: var(--accent); }
+
+.cert-code-gen { display: flex; gap: .5rem; }
+.cert-code-gen .input {
+  flex: 1; font-family: 'Courier New', monospace;
+  font-weight: 900; letter-spacing: 1px; direction: ltr; text-align: center;
+}
+
+.checkbox-row {
+  display: flex; align-items: center; gap: .55rem;
+  font-size: .88rem; font-weight: 600;
+  cursor: pointer; user-select: none;
+}
+.checkbox-row input { width: 17px; height: 17px; accent-color: var(--accent); cursor: pointer; }
+
+/* ---------- استجابة ---------- */
+@media (max-width: 575px) {
+  .row-card { flex-direction: column; align-items: stretch; }
+  .row-actions { justify-content: flex-end; }
+  .editor-form { padding: 1.25rem; }
+  .lesson-row1 { flex-wrap: wrap; }
+  .lesson-row1 .input:first-child { min-width: 100%; }
+}
