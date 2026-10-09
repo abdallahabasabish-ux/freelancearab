@@ -1,0 +1,254 @@
+/* ============================================================
+   courses.css — أنماط كتالوج الكورسات وصفحة التفاصيل
+   ============================================================ */
+
+[hidden] { display: none !important; }
+
+/* ---------- صور البطاقات (Lazy + Fade) ---------- */
+.course-media { position: relative; overflow: hidden; }
+.course-badge { z-index: 1; }
+.course-thumb {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity .45s ease;
+}
+.course-thumb.loaded  { opacity: 1; }
+.course-thumb.failed  { display: none; }
+
+.course-desc {
+  color: var(--text-2);
+  font-size: .9rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---------- شريط أدوات القائمة ---------- */
+.courses-toolbar { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+
+.toolbar-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; }
+
+.search-box { position: relative; flex: 1; min-width: 240px; max-width: 440px; }
+.search-box .icon {
+  position: absolute; inset-inline-start: .9rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3); pointer-events: none;
+}
+.search-box .input { padding-inline-start: 2.7rem; padding-inline-end: 2.9rem; }
+
+.search-clear {
+  position: absolute; inset-inline-end: .5rem; top: 50%;
+  transform: translateY(-50%);
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3);
+}
+.search-clear:hover { color: var(--danger); background: var(--surface-2); }
+
+.toolbar-row .select { max-width: 230px; }
+
+/* رقائق المستوى */
+.chips { display: flex; gap: .5rem; flex-wrap: wrap; }
+.chip {
+  padding: .45rem 1.15rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-2);
+  font-weight: 700; font-size: .85rem;
+  transition: all var(--transition);
+}
+.chip:hover { border-color: var(--primary-ink); color: var(--primary-ink); }
+.chip.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+.results-count { color: var(--text-2); font-size: .9rem; margin-bottom: 1.25rem; min-height: 1.4em; }
+
+/* ---------- الحارس + حالات الفراغ/الخطأ ---------- */
+.sentinel { display: flex; justify-content: center; padding: 1.5rem 0 0; min-height: 70px; }
+.spinner-ring {
+  width: 34px; height: 34px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+.empty-state, .error-state { text-align: center; padding: 3.5rem 1rem; grid-column: 1 / -1; }
+.empty-state .icon-xl, .error-state .icon-xl { margin: 0 auto 1rem; color: var(--text-3); }
+.error-state .icon-xl { color: var(--accent); }
+.empty-state h3, .error-state h2 { margin-bottom: .5rem; }
+.empty-state p, .error-state p { color: var(--text-2); margin-bottom: 1.25rem; }
+
+/* ---------- صفحة تفاصيل الكورس ---------- */
+.course-hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, #274aa8 100%);
+  color: #fff;
+  padding-block: 2.75rem 3.25rem;
+}
+.course-hero::after {
+  content: ""; position: absolute;
+  width: 300px; height: 300px; border-radius: 50%;
+  background: rgba(254, 138, 2, .15);
+  top: -120px; inset-inline-end: -80px;
+}
+.course-hero .container { position: relative; z-index: 1; }
+
+.breadcrumb {
+  display: flex; align-items: center; gap: .55rem; flex-wrap: wrap;
+  font-size: .85rem;
+  color: rgba(255, 255, 255, .72);
+  margin-bottom: 1.4rem;
+}
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb .sep { opacity: .45; }
+.breadcrumb .current { color: rgba(255, 255, 255, .92); font-weight: 600; }
+
+.course-hero h1 { font-size: clamp(1.5rem, 3.5vw, 2.3rem); margin-bottom: 1rem; }
+
+.hero-meta { display: flex; gap: 1.25rem 1.75rem; flex-wrap: wrap; font-size: .92rem; color: rgba(255,255,255,.85); }
+.hero-meta span { display: inline-flex; align-items: center; gap: .45rem; }
+.hero-meta .icon { color: var(--accent); }
+
+/* التخطيط الرئيسي */
+.course-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+  padding-block: 3rem;
+}
+.course-main { display: flex; flex-direction: column; gap: 1.5rem; min-width: 0; }
+
+.about-card { padding: 1.75rem; }
+.about-card h2 {
+  display: flex; align-items: center; gap: .6rem;
+  font-size: 1.2rem; margin-bottom: 1.25rem;
+}
+.about-card h2 .icon { color: var(--accent); }
+.about-card p { color: var(--text-2); margin-bottom: .8rem; }
+.about-card p:last-child { margin-bottom: 0; }
+
+/* العمود الجانبي */
+.course-sidebar {
+  position: sticky;
+  top: calc(var(--header-h) + 1.25rem);
+}
+.sidebar-card { overflow: hidden; }
+
+.sidebar-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: rgba(255, 255, 255, .8);
+}
+
+.sidebar-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+.sidebar-body .price-tag { font-size: 1.35rem; }
+
+.sidebar-stats {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+  display: flex; flex-direction: column; gap: .7rem;
+}
+.sidebar-stats li {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .88rem; color: var(--text-2);
+}
+.sidebar-stats li span { display: inline-flex; align-items: center; gap: .5rem; }
+.sidebar-stats .icon { color: var(--accent); }
+.sidebar-stats b { color: var(--text); font-size: .9rem; }
+
+.sidebar-note {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .8rem; color: var(--text-3);
+  background: var(--surface-2);
+  padding: .6rem .8rem;
+  border-radius: var(--radius-sm);
+}
+.sidebar-note .icon { color: var(--accent); flex-shrink: 0; }
+
+/* أزرار المشاركة */
+.share-row { display: flex; gap: .5rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+.share-btn {
+  flex: 1; height: 40px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--text-2);
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.share-btn svg { width: 18px; height: 18px; fill: currentColor; }
+.share-btn:hover { color: #fff; transform: translateY(-2px); }
+.share-btn.wa:hover   { background: #25d366; border-color: #25d366; }
+.share-btn.x:hover    { background: #000;      border-color: #000; }
+.share-btn.copy:hover { background: var(--primary); border-color: var(--primary); }
+
+/* ---------- المنهج (الفصول والدروس) ---------- */
+.curriculum-note { color: var(--text-2); font-size: .9rem; margin-bottom: 1.25rem; }
+
+.curriculum { display: flex; flex-direction: column; gap: .85rem; }
+
+details.module {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+details.module summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1rem 1.15rem;
+  cursor: pointer;
+  list-style: none;
+  background: var(--surface-2);
+  font-weight: 800;
+  user-select: none;
+}
+details.module summary::-webkit-details-marker { display: none; }
+details.module[open] summary { border-bottom: 1px solid var(--border); }
+
+.module-info { display: flex; align-items: center; gap: .75rem; min-width: 0; }
+.module-num {
+  width: 34px; height: 34px; flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--primary-soft); color: var(--primary-ink);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; font-weight: 900;
+}
+.module-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.module-count { font-size: .78rem; color: var(--text-3); font-weight: 600; white-space: nowrap; }
+details.module .chev { color: var(--text-3); transition: transform .25s; flex-shrink: 0; }
+details.module[open] .chev { transform: rotate(180deg); }
+
+.lesson-list { padding: .4rem .75rem; }
+.lesson-row {
+  display: flex; align-items: center; gap: .75rem;
+  padding: .7rem .5rem;
+  font-size: .92rem;
+}
+.lesson-row + .lesson-row { border-top: 1px dashed var(--border); }
+.lesson-row > .icon { color: var(--text-3); flex-shrink: 0; }
+.lesson-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lesson-duration { color: var(--text-3); font-size: .8rem; direction: ltr; }
+
+/* ---------- الرئيسية: زر عرض الكل ---------- */
+.home-more { text-align: center; margin-top: 2.5rem; }
+
+/* ---------- استجابة ---------- */
+.skel-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; }
+
+@media (max-width: 900px) {
+  .course-layout, .skel-grid { grid-template-columns: 1fr; }
+  .course-sidebar { position: static; }
+}
+@media (max-width: 575px) {
+  .toolbar-row { flex-direction: column; align-items: stretch; }
+  .toolbar-row .select { max-width: none; }
+  .about-card { padding: 1.25rem; }
+}
