@@ -8,6 +8,7 @@ import {
   updateDoc, doc, writeBatch, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { requireAuth, initHeaderAuth } from './auth.js';
+import { safeLinkUrl } from './courses-data.js';
 
 const $ = (s) => document.querySelector(s);
 const toast = (m, t) => window.AFA?.toast(m, t);
@@ -51,8 +52,9 @@ function main({ user, profile }) {
     list.innerHTML = latest.map((n) => {
       const icon = TYPE_ICONS[n.type] || 'i-bell';
       const time = n.createdAt?.seconds ? timeAgo(n.createdAt.seconds) : '';
+      const link = safeLinkUrl(n.link || '', '');
       return `
-      <div class="notif-item ${n.readAt ? '' : 'unread'}" data-id="${n.id}" data-link="${esc(n.link || '')}" role="button" tabindex="0">
+      <div class="notif-item ${n.readAt ? '' : 'unread'}" data-id="${n.id}" data-link="${esc(link)}" role="button" tabindex="0">
         <span class="notif-ico ${esc(n.type || 'system')}">
           <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#${icon}"></use></svg>
         </span>
@@ -72,7 +74,8 @@ function main({ user, profile }) {
     if (!item) return;
     const { id, link } = item.dataset;
     try { await updateDoc(doc(db, 'notifications', id), { readAt: serverTimestamp() }); } catch { /* تجاهل */ }
-    if (link) location.href = link;
+    const safeUrl = safeLinkUrl(link || '', '');
+    if (safeUrl) location.href = safeUrl;
   });
 
   /* تعليم الكل كمقروء (Batch ذرّي) */

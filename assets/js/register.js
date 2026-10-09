@@ -5,8 +5,9 @@
 
 import { auth, db } from './firebase-config.js';
 import {
-  createUserWithEmailAndPassword, sendEmailVerification,
-  reload, updateProfile
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, setDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
@@ -42,7 +43,11 @@ function startPolling() {
   pollTimer = setInterval(async () => {
     const user = auth.currentUser;
     if (!user) return stopPolling();
-    await reload(user).catch(() => {});
+    try {
+      await user.reload();
+    } catch {
+      /* تجاهل */
+    }
     if (user.emailVerified) {
       stopPolling();
       await finishVerification(user);
@@ -119,6 +124,7 @@ pwInput.addEventListener('input', () => {
   const email    = $('#email').value.trim();
   const pw       = pwInput.value;
   const confirm  = $('#confirmPassword').value;
+  const blogFollow = $('#acceptBlogFollow');
 
   /* تحقق يدوي قبل الإرسال */
   if (!isValidFullName(fullName)) {
@@ -129,6 +135,11 @@ pwInput.addEventListener('input', () => {
   if (pw !== confirm) {
     $('#confirmError').style.display = 'block';
     $('#confirmPassword').focus();
+    return;
+  }
+  if (!blogFollow.checked) {
+    toast('يجب متابعة مدونة عرب فريلانسر قبل إتمام التسجيل.', 'warning');
+    blogFollow.focus();
     return;
   }
   $('#confirmError').style.display = 'none';
@@ -170,7 +181,11 @@ pwInput.addEventListener('input', () => {
   const user = auth.currentUser;
   if (!user) return toast('انتهت الجلسة — سجل الدخول من جديد.', 'warning');
   setLoading(btn, true);
-  await reload(user).catch(() => {});
+  try {
+    await user.reload();
+  } catch {
+    /* تجاهل */
+  }
   if (user.emailVerified) {
     await finishVerification(user);
   } else {

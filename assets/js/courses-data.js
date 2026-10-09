@@ -42,6 +42,23 @@ export function getYoutubeId(url = '') {
   return m ? m[1] : null;
 }
 
+/* قبول الروابط الآمنة فقط: روابط داخلية أو https الخارجية، مع منع javascript: وdata: */
+export function safeLinkUrl(raw = '', fallback = '/') {
+  const value = String(raw || '').trim();
+  if (!value) return fallback;
+
+  try {
+    if (/^(?:\/|\.\/|\.\.\/)/.test(value)) return value;
+
+    const url = new URL(value, window.location.origin);
+    if (['http:', 'https:'].includes(url.protocol)) return url.href;
+  } catch {
+    // تجاهل الروابط غير الصالحة
+  }
+
+  return fallback;
+}
+
 /* صورة مصغرة: مخصصة أو مشتقة من فيديو الإعلان أو بلا (تدرج لوني) */
 export function getThumb(course) {
   if (course.thumbnailURL) return course.thumbnailURL;

@@ -6,7 +6,7 @@
 import { db } from './firebase-config.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { requireAuth, initHeaderAuth } from './auth.js';
-import { fetchCourseById, escapeHtml, formatDuration, getYoutubeId } from './courses-data.js';
+import { fetchCourseById, escapeHtml, formatDuration, getYoutubeId, safeLinkUrl } from './courses-data.js';
 import { fetchProgress, saveLastLesson, toggleLessonComplete, POINTS_PER_LESSON } from './progress.js';
 import { listenLessonNotes, addNote, updateNoteText, deleteNote } from './notes.js';
 
@@ -206,12 +206,16 @@ function renderAttachments(list) {
   const arr = Array.isArray(list) ? list.filter((a) => a?.url) : [];
   if (!arr.length) return;
   $('#attachmentsWrap').hidden = false;
-  $('#attachmentsList').innerHTML = arr.map((a) => `
-    <a class="attachment" href="${escapeHtml(a.url)}" target="_blank" rel="noopener noreferrer">
-      <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-file"></use></svg>
-      <span>${escapeHtml(a.title || 'مرفق')}</span>
-      <svg class="icon dl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg>
-    </a>`).join('');
+  $('#attachmentsList').innerHTML = arr.map((a) => {
+    const url = safeLinkUrl(a.url, '');
+    if (!url) return `<div class="attachment is-disabled" aria-disabled="true"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-file"></use></svg><span>${escapeHtml(a.title || 'مرفق')}</span><svg class="icon dl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg></div>`;
+    return `
+      <a class="attachment" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-file"></use></svg>
+        <span>${escapeHtml(a.title || 'مرفق')}</span>
+        <svg class="icon dl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg>
+      </a>`;
+  }).join('');
 }
 
 /* ==================== التنقل والإتمام ==================== */

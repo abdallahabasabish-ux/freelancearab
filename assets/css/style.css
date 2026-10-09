@@ -6,13 +6,16 @@
 /* ---------- 1) متغيرات التصميم (الوضع النهاري) ---------- */
 :root {
   /* الألوان الأساسية */
+  --black:        #0b0d12;
+  --black-alt:    #121827;
+  --black-soft:   rgba(11, 13, 18, .08);
   --primary:      #1e3a8a;
   --primary-dark: #16296b;
   --primary-ink:  #1e3a8a;             /* للنصوص فوق الخلفيات */
   --primary-soft: rgba(30, 58, 138, .08);
-  --accent:       #fe8a02;
-  --accent-dark:  #d97400;
-  --accent-soft:  rgba(254, 138, 2, .12);
+  --accent:       #f59e0b;
+  --accent-dark:  #d97706;
+  --accent-soft:  rgba(245, 158, 11, .12);
 
   --success: #16a34a;  --success-soft: rgba(22, 163, 74, .12);
   --danger:  #dc2626;  --danger-soft:  rgba(220, 38, 38, .12);
@@ -56,9 +59,10 @@
   --text-3:    #5f6f8d;
   --border:    #22304f;
   --header-bg: rgba(10, 16, 31, .82);
+  --black-soft: rgba(11, 13, 18, .18);
   --primary-ink: #93a9f5;
   --primary-soft: rgba(147, 169, 245, .12);
-  --accent-soft:  rgba(254, 138, 2, .16);
+  --accent-soft:  rgba(245, 158, 11, .16);
   --shadow-md: 0 6px 16px -4px rgba(0, 0, 0, .5);
   --shadow-lg: 0 20px 40px -12px rgba(0, 0, 0, .6);
 }
@@ -67,6 +71,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+img { max-width: 100%; height: auto; }
 
 body {
   font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
@@ -155,36 +160,94 @@ html.theme-switching .feature-card {
 
 /* ---------- 5) الأزرار ---------- */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: .72rem 1.5rem;
-  border-radius: var(--radius-sm);
-  font-weight: 700; font-size: .95rem; line-height: 1.5;
-  border: 2px solid transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: .55rem;
+  padding: .82rem 1.55rem;
+  border-radius: 14px;
+  font-weight: 800; font-size: .96rem; line-height: 1.4;
+  border: 1.5px solid transparent;
+  letter-spacing: .01em;
   user-select: none; white-space: nowrap;
+  box-shadow: 0 8px 18px -10px rgba(15, 23, 42, 0.45);
   transition: transform var(--transition), box-shadow var(--transition),
               background-color var(--transition), color var(--transition),
-              border-color var(--transition);
+              border-color var(--transition), opacity var(--transition);
 }
-.btn:active { transform: scale(.97); }
+.btn:hover {
+  box-shadow: 0 14px 26px -12px rgba(15, 23, 42, 0.35);
+}
+.btn:active { transform: translateY(1px) scale(.99); }
 .btn[disabled] { opacity: .6; pointer-events: none; }
 
-.btn-primary { background: var(--primary); color: #fff; box-shadow: var(--shadow-primary); }
-.btn-primary:hover { background: var(--primary-dark); }
+.btn-primary {
+  background: linear-gradient(135deg, #0f172a, #1a2f6d 38%, #254ac7 100%);
+  color: #fff;
+  box-shadow: 0 16px 26px -12px rgba(27, 51, 126, 0.8);
+}
+.btn-primary:hover { background: linear-gradient(135deg, #0a0d14, #172d63 40%, #1d3ea8 100%); }
 
-.btn-accent { background: var(--accent); color: #fff; box-shadow: 0 8px 20px -6px rgba(254,138,2,.5); }
-.btn-accent:hover { background: var(--accent-dark); }
+.btn-accent {
+  background: linear-gradient(135deg, #f9bf5b, #f59e0b 45%, #d97706 100%);
+  color: #fff;
+  box-shadow: 0 16px 26px -12px rgba(217, 119, 6, 0.8);
+}
+.btn-accent:hover { background: linear-gradient(135deg, #f7b93c, #ef8b00 45%, #c86a00 100%); }
 
-.btn-outline { border-color: var(--primary-ink); color: var(--primary-ink); background: transparent; }
-.btn-outline:hover { background: var(--primary-soft); }
+.btn-dark {
+  background: linear-gradient(135deg, #111827, #0b0d12 58%, #171d2d 100%);
+  color: #fff;
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 16px 28px -14px rgba(11,13,18,0.9);
+}
+.btn-dark:hover {
+  background: linear-gradient(135deg, #0d1119, #090b10 60%, #121b2b 100%);
+}
 
-.btn-ghost { color: var(--text-2); }
-.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+.btn-outline {
+  border-color: rgba(30, 58, 138, 0.35);
+  color: var(--primary-ink);
+  background: rgba(255,255,255,0.75);
+}
+.btn-outline:hover {
+  background: var(--primary-soft);
+  border-color: var(--primary-ink);
+}
 
-.btn-light { background: #fff; color: var(--primary); } /* فوق الخلفيات الملونة */
-.btn-light:hover { background: #eef1ff; }
+.btn-ghost {
+  color: var(--text-2);
+  background: transparent;
+  box-shadow: none;
+}
+.btn-ghost:hover {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: none;
+}
 
-.btn-sm { padding: .45rem 1rem; font-size: .85rem; }
-.btn-lg { padding: .9rem 2.2rem; font-size: 1.05rem; }
+.btn-light {
+  background: rgba(255,255,255,0.96);
+  color: var(--primary);
+  border-color: rgba(255,255,255,0.5);
+}
+.btn-light:hover { background: #eef4ff; }
+
+.btn-primary, .btn-accent, .btn-dark {
+  position: relative;
+  overflow: hidden;
+}
+.btn-primary::before, .btn-accent::before, .btn-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(255,255,255,0.18), rgba(255,255,255,0), rgba(255,255,255,0.12));
+  transform: translateX(-110%);
+  transition: transform .7s ease;
+}
+.btn-primary:hover::before, .btn-accent:hover::before, .btn-dark:hover::before {
+  transform: translateX(110%);
+}
+
+.btn-sm { padding: .55rem 1.05rem; font-size: .85rem; }
+.btn-lg { padding: .96rem 2.25rem; font-size: 1.04rem; }
 .btn-block { width: 100%; }
 
 /* ---------- 6) الهيدر ---------- */
@@ -266,6 +329,24 @@ html.theme-switching .feature-card {
 @media (max-width: 639px) {
   .header-actions .btn-login { display: none; }
   .brand-name { font-size: .95rem; }
+}
+
+@media (max-width: 480px) {
+  .container { padding-inline: .9rem; }
+  .header-inner { gap: .6rem; }
+  .brand { min-width: 0; }
+  .brand-name {
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .main-nav { width: 100%; }
+  .nav-link { width: 100%; text-align: center; }
+  .hero-cta { flex-direction: column; }
+  .hero-cta .btn { width: 100%; }
+  .cta-band { padding: 2.5rem 1.2rem; }
+  .site-footer .footer-grid { grid-template-columns: 1fr; }
 }
 
 /* ---------- 8) القسم الرئيسي (Hero) ---------- */

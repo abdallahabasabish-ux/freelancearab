@@ -33,111 +33,145 @@
         <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
         <span class="brand-name">أكاديمية <b>عرب فريلانسر</b></span>
       </a>
-      <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
-        <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
-        <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
-      </button>
+      <div class="auth-header-tools">
+        <a href="/" class="auth-back-link" aria-label="العودة إلى الصفحة الرئيسية">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-arrow-left"></use></svg>
+          <span>عودة</span>
+        </a>
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+      </div>
     </div>
   </header>
 
   <main class="auth-main">
-    <div class="auth-card">
-
-      <!-- ====== لوحة تسجيل الدخول ====== -->
-      <div class="auth-panel" id="panelLogin">
-        <h1 class="auth-title">تسجيل الدخول</h1>
-        <p class="auth-sub">مرحباً بعودتك! أكمل من حيث توقفت</p>
-
-        <form id="loginForm" novalidate>
-          <div class="field">
-            <label class="label" for="email">البريد الإلكتروني</label>
-            <div class="input-icon-wrap">
-              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
-              <input type="email" id="email" class="input" placeholder="you@example.com" autocomplete="email" dir="ltr" required>
+    <div class="auth-shell">
+      <aside class="auth-visual" aria-label="معلومات أكاديمية عرب فريلانسر">
+        <div class="auth-visual-inner">
+          <div class="auth-brand-badge">
+            <img src="/assets/icons/icon.svg" alt="شعار أكاديمية عرب فريلانسر" class="brand-logo">
+            <div>
+              <span class="eyebrow eyebrow-light">أكاديمية عرب فريلانسر</span>
+              <strong>مستقبلك المهني يبدأ من هنا</strong>
             </div>
           </div>
 
-          <div class="field">
-            <label class="label" for="password">كلمة المرور</label>
-            <div class="pw-wrap">
-              <input type="password" id="password" class="input" placeholder="••••••••" autocomplete="current-password" dir="ltr" required>
-              <button type="button" class="pw-toggle" data-pw-toggle="password" aria-label="إظهار كلمة المرور">
-                <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-eye"></use></svg>
+          <h1>تعلّم، طوّر مهاراتك، وابنِ مسارك الاحترافي في سوق العمل العربي.</h1>
+          <p>
+            صممنا لك بيئة تعليمية عملية ومباشرة لتطوير مهاراتك بشكل احترافي، مع دعم متواصل
+            من خبراء السوق العربي.
+          </p>
+
+          <ul class="auth-feature-list">
+            <li>مسارات عملية وموجهة نحو الواقع المهني</li>
+            <li>شهادات موثقة ورسومات تعليمية واضحة</li>
+            <li>مجتمع عربي يركز على التطوير والتوظيف</li>
+          </ul>
+        </div>
+      </aside>
+
+      <div class="auth-form-panel">
+        <div class="auth-card">
+
+          <!-- ====== لوحة تسجيل الدخول ====== -->
+          <div class="auth-panel" id="panelLogin">
+            <h1 class="auth-title">تسجيل الدخول</h1>
+            <p class="auth-sub">مرحباً بعودتك! أكمل من حيث توقفت</p>
+
+            <form id="loginForm" novalidate>
+              <div class="field">
+                <label class="label" for="email">البريد الإلكتروني</label>
+                <div class="input-icon-wrap">
+                  <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
+                  <input type="email" id="email" class="input" placeholder="you@example.com" autocomplete="email" dir="ltr" required>
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="label" for="password">كلمة المرور</label>
+                <div class="pw-wrap">
+                  <input type="password" id="password" class="input" placeholder="••••••••" autocomplete="current-password" dir="ltr" required>
+                  <button type="button" class="pw-toggle" data-pw-toggle="password" aria-label="إظهار كلمة المرور">
+                    <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-eye"></use></svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field" style="text-align:left; margin-top:-.5rem;">
+                <button type="button" class="btn btn-ghost btn-sm" id="forgotLink">نسيت كلمة المرور؟</button>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
+                <span class="spinner" aria-hidden="true"></span>
+                تسجيل الدخول
               </button>
+            </form>
+
+            <div class="divider">أو</div>
+
+            <button type="button" class="btn btn-google" id="googleBtn">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.57 5.57 0 0 1-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.29A7.2 7.2 0 0 1 4.89 12c0-.8.14-1.57.38-2.29V6.62H1.29a12 12 0 0 0 0 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
+              المتابعة بحساب Google
+            </button>
+
+            <p class="auth-alt">ليس لديك حساب؟ <a href="/register.html">أنشئ حساباً مجانياً</a></p>
+          </div>
+
+          <!-- ====== لوحة استعادة كلمة المرور ====== -->
+          <div class="auth-panel" id="panelReset" hidden>
+            <h1 class="auth-title">استعادة كلمة المرور</h1>
+            <p class="auth-sub">أدخل بريدك وسنرسل لك رابط إعادة التعيين</p>
+
+            <div class="alert alert-success" id="resetSuccess" hidden>
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check-circle"></use></svg>
+              <span>تم الإرسال! تحقق من بريدك (ومجلد Spam) واتبع الرابط لتعيين كلمة مرور جديدة.</span>
+            </div>
+
+            <form id="resetForm" novalidate>
+              <div class="field">
+                <label class="label" for="resetEmail">البريد الإلكتروني</label>
+                <div class="input-icon-wrap">
+                  <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
+                  <input type="email" id="resetEmail" class="input" placeholder="you@example.com" autocomplete="email" dir="ltr" required>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-accent btn-block btn-lg" id="resetBtn">
+                <span class="spinner" aria-hidden="true"></span>
+                إرسال رابط الاستعادة
+              </button>
+            </form>
+
+            <p class="auth-alt"><button type="button" class="btn btn-ghost btn-sm" id="backToLogin">← العودة لتسجيل الدخول</button></p>
+          </div>
+
+          <!-- ====== لوحة تأكيد البريد ====== -->
+          <div class="auth-panel verify-panel" id="panelVerify" hidden>
+            <div class="verify-icon">
+              <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
+            </div>
+            <h1 class="auth-title">فعّل بريدك الإلكتروني أولاً</h1>
+            <p class="auth-sub">
+              يجب تأكيد البريد قبل الدخول — الرابط أُرسل إلى<br>
+              <span class="verify-email" id="verifyEmail"></span>
+            </p>
+            <div class="alert alert-info">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-alert"></use></svg>
+              <span>افتح بريدك واضغط رابط التحقق ثم اضغط "متابعة" هنا. إذا تأخر الوصول فتحقق من مجلد Spam.</span>
+            </div>
+            <div class="verify-actions">
+              <button type="button" class="btn btn-accent btn-block btn-lg" id="continueBtn">
+                <span class="spinner" aria-hidden="true"></span>
+                تحققت من بريدي — متابعة
+              </button>
+              <button type="button" class="btn btn-outline btn-block" id="resendBtn">إعادة إرسال رابط التفعيل</button>
+              <button type="button" class="btn btn-ghost btn-sm" id="switchAccountBtn">الدخول بحساب آخر</button>
             </div>
           </div>
 
-          <div class="field" style="text-align:left; margin-top:-.5rem;">
-            <button type="button" class="btn btn-ghost btn-sm" id="forgotLink">نسيت كلمة المرور؟</button>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block btn-lg" id="submitBtn">
-            <span class="spinner" aria-hidden="true"></span>
-            تسجيل الدخول
-          </button>
-        </form>
-
-        <div class="divider">أو</div>
-
-        <button type="button" class="btn btn-google" id="googleBtn">
-          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47a5.57 5.57 0 0 1-2.4 3.58v3h3.86c2.26-2.09 3.56-5.17 3.56-8.82z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.86-3c-1.08.72-2.45 1.16-4.07 1.16-3.13 0-5.78-2.11-6.73-4.96H1.29v3.09A11.99 11.99 0 0 0 12 24z"/><path fill="#FBBC05" d="M5.27 14.29A7.2 7.2 0 0 1 4.89 12c0-.8.14-1.57.38-2.29V6.62H1.29a12 12 0 0 0 0 10.76l3.98-3.09z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.69 1.29 6.62l3.98 3.09C6.22 6.86 8.87 4.75 12 4.75z"/></svg>
-          المتابعة بحساب Google
-        </button>
-
-        <p class="auth-alt">ليس لديك حساب؟ <a href="/register.html">أنشئ حساباً مجانياً</a></p>
-      </div>
-
-      <!-- ====== لوحة استعادة كلمة المرور ====== -->
-      <div class="auth-panel" id="panelReset" hidden>
-        <h1 class="auth-title">استعادة كلمة المرور</h1>
-        <p class="auth-sub">أدخل بريدك وسنرسل لك رابط إعادة التعيين</p>
-
-        <div class="alert alert-success" id="resetSuccess" hidden>
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check-circle"></use></svg>
-          <span>تم الإرسال! تحقق من بريدك (ومجلد Spam) واتبع الرابط لتعيين كلمة مرور جديدة.</span>
-        </div>
-
-        <form id="resetForm" novalidate>
-          <div class="field">
-            <label class="label" for="resetEmail">البريد الإلكتروني</label>
-            <div class="input-icon-wrap">
-              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
-              <input type="email" id="resetEmail" class="input" placeholder="you@example.com" autocomplete="email" dir="ltr" required>
-            </div>
-          </div>
-          <button type="submit" class="btn btn-accent btn-block btn-lg" id="resetBtn">
-            <span class="spinner" aria-hidden="true"></span>
-            إرسال رابط الاستعادة
-          </button>
-        </form>
-
-        <p class="auth-alt"><button type="button" class="btn btn-ghost btn-sm" id="backToLogin">← العودة لتسجيل الدخول</button></p>
-      </div>
-
-      <!-- ====== لوحة تأكيد البريد ====== -->
-      <div class="auth-panel verify-panel" id="panelVerify" hidden>
-        <div class="verify-icon">
-          <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-mail"></use></svg>
-        </div>
-        <h1 class="auth-title">فعّل بريدك الإلكتروني أولاً</h1>
-        <p class="auth-sub">
-          يجب تأكيد البريد قبل الدخول — الرابط أُرسل إلى<br>
-          <span class="verify-email" id="verifyEmail"></span>
-        </p>
-        <div class="alert alert-info">
-          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-alert"></use></svg>
-          <span>افتح بريدك واضغط رابط التحقق ثم اضغط "متابعة" هنا. إذا تأخر الوصول فتحقق من مجلد Spam.</span>
-        </div>
-        <div class="verify-actions">
-          <button type="button" class="btn btn-accent btn-block btn-lg" id="continueBtn">
-            <span class="spinner" aria-hidden="true"></span>
-            تحققت من بريدي — متابعة
-          </button>
-          <button type="button" class="btn btn-outline btn-block" id="resendBtn">إعادة إرسال رابط التفعيل</button>
-          <button type="button" class="btn btn-ghost btn-sm" id="switchAccountBtn">الدخول بحساب آخر</button>
         </div>
       </div>
-
     </div>
   </main>
 

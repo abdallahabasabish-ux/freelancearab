@@ -5,7 +5,9 @@
 
 import { auth, db } from './firebase-config.js';
 import {
-  signInWithEmailAndPassword, sendPasswordResetEmail, reload
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { doc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import {
@@ -67,7 +69,11 @@ function openVerifyPanel(email) {
   pollTimer = setInterval(async () => {
     const user = auth.currentUser;
     if (!user) return stopPolling();
-    await reload(user).catch(() => {});
+    try {
+      await user.reload();
+    } catch {
+      /* تجاهل */
+    }
     if (user.emailVerified) { stopPolling(); await finishVerification(user); }
   }, 6000);
 }
@@ -87,7 +93,11 @@ async function finishVerification(user) {
   const user = auth.currentUser;
   if (!user) return toast('انتهت الجلسة — سجل الدخول من جديد.', 'warning');
   setLoading(btn, true);
-  await reload(user).catch(() => {});
+  try {
+    await user.reload();
+  } catch {
+    /* تجاهل */
+  }
   if (user.emailVerified) {
     await finishVerification(user);
   } else {
