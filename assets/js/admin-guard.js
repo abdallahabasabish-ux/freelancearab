@@ -12,17 +12,25 @@ export async function requireAdmin() {
   if (!ctx) return null;
 
   let isAdmin = false;
+  let adminCheckError = null;
   try {
     isAdmin = (await getDoc(doc(db, 'admins', ctx.user.uid))).exists();
   } catch (err) {
+    adminCheckError = err;
     console.error('تعذر التحقق من صلاحية المدير:', err);
   }
 
   if (!isAdmin) {
     const sk = document.getElementById('adminSkeleton');
     const denied = document.getElementById('deniedState');
+    const diagnostic = document.getElementById('adminDeniedDetails');
     if (sk) sk.hidden = true;
     if (denied) denied.hidden = false;
+    if (diagnostic) {
+      diagnostic.textContent = adminCheckError
+        ? `تعذر قراءة مستند الإدارة (${adminCheckError.code || 'خطأ اتصال'}). UID الحالي: ${ctx.user.uid}`
+        : `لم يُعثر على مستند admins/${ctx.user.uid} في مشروع freelance-arab.`;
+    }
     return null;
   }
 
