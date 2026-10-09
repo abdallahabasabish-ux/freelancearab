@@ -3,12 +3,12 @@ import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD8q05OB-2URf_5z59UD0NBKoA3NXaxncs",
-  authDomain: "academy-os-314c0.firebaseapp.com",
-  projectId: "academy-os-314c0",
-  storageBucket: "academy-os-314c0.firebasestorage.app",
-  messagingSenderId: "790267436938",
-  appId: "1:790267436938:web:bdca5eaa023f7471c5b273",
+  apiKey: "AIzaSyCCwf3A43r0K_fiYH0tVlent_DgV9zMo54",
+  authDomain: "freelance-arab.firebaseapp.com",
+  projectId: "freelance-arab",
+  storageBucket: "freelance-arab.firebasestorage.app",
+  messagingSenderId: "268442782459",
+  appId: "1:268442782459:web:b6b330f97460cdf30b7e5e",
 };
 
 const app = initializeApp(firebaseConfig);
