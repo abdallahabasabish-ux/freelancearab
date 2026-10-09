@@ -5,7 +5,7 @@
    - واجهة الهيدر: initHeaderAuth + تسجيل الخروج
    ============================================================ */
 
-import { auth, db, googleProvider } from './assets/js/firebase-config.js';
+import { auth, db, googleProvider } from './firebase-config.js';
 import {
   onAuthStateChanged, signOut, signInWithPopup,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
