@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إدارة الطلاب | لوحة الإدارة</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/admin.css">
+</head>
+<body>
+
+  <header class="site-header admin-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/admin/index.html" class="brand">
+        <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+        <span class="brand-name">لوحة <b>الإدارة</b></span>
+        <span class="admin-tag">ADMIN</span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="تنقل الإدارة">
+        <a href="/admin/index.html" class="nav-link">نظرة عامة</a>
+        <a href="/admin/courses-manage.html" class="nav-link">الكورسات</a>
+        <a href="/admin/students-manage.html" class="nav-link active">الطلاب</a>
+        <a href="/" class="nav-link">الموقع</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <button class="icon-btn" data-logout aria-label="تسجيل الخروج" title="تسجيل الخروج">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-log-out"></use></svg>
+        </button>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-page">
+    <div class="container">
+
+      <div id="adminSkeleton">
+        <div class="skeleton" style="height:64px; border-radius:var(--radius); margin-bottom:1rem;"></div>
+        <div class="skeleton" style="height:90px; border-radius:var(--radius);"></div>
+        <div class="skeleton" style="height:90px; border-radius:var(--radius); margin-top:.75rem;"></div>
+      </div>
+
+      <div class="admin-error" id="deniedState" hidden>
+        <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-lock"></use></svg>
+        <h2>هذه الصفحة للإدارة فقط</h2>
+        <a href="/" class="btn btn-primary">العودة للموقع</a>
+      </div>
+
+      <div id="adminContent" hidden>
+
+        <div class="admin-page-head">
+          <div>
+            <h1>إدارة الطلاب</h1>
+            <p>إصدار الشهادات، إرسال الإشعارات، وتصدير البيانات.</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="exportBtn">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-download"></use></svg>
+            تصدير CSV
+          </button>
+        </div>
+
+        <div class="list-toolbar">
+          <div class="search-box">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-search"></use></svg>
+            <input type="search" id="searchInput" class="input" placeholder="ابحث بالاسم أو البريد أو الهاتف...">
+          </div>
+        </div>
+
+        <div class="rows-stack" id="studentsList"></div>
+
+        <div class="admin-empty" id="studentsEmpty" hidden>
+          <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-users"></use></svg>
+          <h3>لا يوجد طلاب بعد</h3>
+          <p>سيظهرون هنا تلقائياً عند أول تسجيل.</p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ====== نافذة إصدار شهادة ====== -->
+  <div class="modal-overlay" id="certModal" role="dialog" aria-modal="true" aria-labelledby="certModalTitle">
+    <div class="modal modal-lg">
+      <h3 class="modal-title" id="certModalTitle">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg>
+        إصدار شهادة
+      </h3>
+      <form id="certForm" novalidate>
+        <div class="field">
+          <label class="label" for="certName">اسم الطالب (كما سيظهر في الشهادة) <span class="req">*</span></label>
+          <input type="text" id="certName" class="input" required>
+        </div>
+        <div class="field">
+          <label class="label" for="certCourse">اسم الكورس <span class="req">*</span></label>
+          <input type="text" id="certCourse" class="input" placeholder="مثال: أساسيات العمل الحر" required>
+        </div>
+        <div class="field">
+          <label class="label" for="certPdf">رابط ملف الشهادة PDF</label>
+          <input type="url" id="certPdf" class="input" dir="ltr" placeholder="https://... (ارفع PDF في أي مستضيف مجاني)">
+          <p class="hint">يمكنك رفع PDF مجاناً عبر GitHub repo أو Google Drive (رابط مباشر).</p>
+        </div>
+        <div class="field">
+          <label class="label" for="certCode">كود التحقق (معرف الشهادة)</label>
+          <div class="cert-code-gen">
+            <input type="text" id="certCode" class="input" required>
+            <button type="button" class="btn btn-outline btn-sm" id="regenCode">
+              <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-refresh"></use></svg>
+            </button>
+          </div>
+          <p class="hint">هذا الكود هو رابط التحقق العام — لا يمكن تغييره بعد الإصدار.</p>
+        </div>
+        <label class="checkbox-row" style="margin-bottom:1.25rem;">
+          <input type="checkbox" id="certNotify" checked>
+          إنشاء إشعار داخلي للطالب بإصدار الشهادة
+        </label>
+        <div style="display:flex; gap:.6rem; justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" data-close-modal>إلغاء</button>
+          <button type="submit" class="btn btn-primary" id="certSubmit">
+            <span class="spinner" aria-hidden="true"></span>
+            إصدار الشهادة
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====== نافذة إرسال إشعار ====== -->
+  <div class="modal-overlay" id="notifModal" role="dialog" aria-modal="true" aria-labelledby="notifModalTitle">
+    <div class="modal modal-lg">
+      <h3 class="modal-title" id="notifModalTitle">
+        <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-bell"></use></svg>
+        إرسال إشعار داخلي
+      </h3>
+      <form id="notifForm" novalidate>
+        <div class="field">
+          <label class="label" for="notifType">نوع الإشعار</label>
+          <select id="notifType" class="select">
+            <option value="course">كورس جديد</option>
+            <option value="certificate">شهادة</option>
+            <option value="system">رسالة نظام</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="notifTitle">العنوان <span class="req">*</span></label>
+          <input type="text" id="notifTitle" class="input" placeholder="مثال: 🎓 كورس جديد متاح الآن!" required>
+        </div>
+        <div class="field">
+          <label class="label" for="notifBody">النص</label>
+          <textarea id="notifBody" class="textarea" rows="3" placeholder="تفاصيل الإشعار..."></textarea>
+        </div>
+        <div class="field">
+          <label class="label" for="notifLink">رابط عند الضغط (اختياري)</label>
+          <input type="text" id="notifLink" class="input" dir="ltr" placeholder="/courses.html">
+        </div>
+        <div style="display:flex; gap:.6rem; justify-content:flex-end;">
+          <button type="button" class="btn btn-ghost" data-close-modal>إلغاء</button>
+          <button type="submit" class="btn btn-primary" id="notifSubmit">
+            <span class="spinner" aria-hidden="true"></span>
+            إرسال الإشعار
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+  <script type="module" src="/assets/js/admin-students.js"></script>
+</body>
+</html>
