@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة الطالب | أكاديمية عرب فريلانسر</title>
+  <meta name="description" content="تابع تقدمك في كورساتك، نقاطك، وشهاداتك في أكاديمية عرب فريلانسر.">
+  <meta name="robots" content="noindex">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/learn.css">
+</head>
+<body>
+
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+        <span class="brand-name">أكاديمية <b>عرب فريلانسر</b></span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="التنقل الرئيسي">
+        <a href="/" class="nav-link">الرئيسية</a>
+        <a href="/courses.html" class="nav-link">الكورسات</a>
+        <a href="/dashboard.html" class="nav-link active">لوحتي</a>
+        <a href="/verify.html" class="nav-link">التحقق من شهادة</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <div class="user-chip" data-auth-user hidden>
+          <a href="/profile.html" class="user-chip-link" title="ملفي الشخصي">
+            <img class="user-avatar" data-user-avatar alt="" src="/assets/icons/icon.svg">
+            <span class="user-name" data-user-name>حسابي</span>
+          </a>
+          <button class="icon-btn" data-logout aria-label="تسجيل الخروج" title="تسجيل الخروج">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-log-out"></use></svg>
+          </button>
+        </div>
+        <a href="/login.html" class="btn btn-outline btn-sm" data-auth-guest hidden>دخول</a>
+        <a href="/register.html" class="btn btn-accent btn-sm" data-auth-guest hidden>ابدأ مجاناً</a>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="dash-page">
+    <div class="container">
+
+      <div class="page-head">
+        <h1>أهلاً بك، <span id="firstName">…</span> 👋</h1>
+        <p>تابع تقدمك وأكمل رحلة تعلمك من حيث توقفت.</p>
+      </div>
+
+      <!-- الإحصائيات -->
+      <div class="dash-stats">
+        <div class="stat-card card">
+          <div class="stat-icon a"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-star"></use></svg></div>
+          <div><div class="stat-value" id="statPoints">—</div><div class="stat-label">نقاطي</div></div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-icon b"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg></div>
+          <div><div class="stat-value" id="statCourses">—</div><div class="stat-label">كورساتي</div></div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-icon b"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check-circle"></use></svg></div>
+          <div><div class="stat-value" id="statLessons">—</div><div class="stat-label">دروس مكتملة</div></div>
+        </div>
+        <div class="stat-card card">
+          <div class="stat-icon a"><svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-award"></use></svg></div>
+          <div><div class="stat-value" id="statCerts">—</div><div class="stat-label">شهاداتي</div></div>
+        </div>
+      </div>
+
+      <!-- أكمل من حيث توقفت -->
+      <section id="continueSection" hidden>
+        <h2 class="dash-section-title">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-zap"></use></svg>
+          أكمل من حيث توقفت
+        </h2>
+        <div class="continue-card card" id="continueCard"></div>
+      </section>
+
+      <!-- كورساتي -->
+      <section>
+        <h2 class="dash-section-title">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg>
+          كورساتي
+        </h2>
+        <div class="my-courses-grid" id="myCourses"></div>
+
+        <div class="empty-state" id="dashEmpty" hidden>
+          <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-graduation-cap"></use></svg>
+          <h3>لم تبدأ أي كورس بعد</h3>
+          <p>اختر كورسك الأول من الكتالوف وابدأ رحلتك اليوم — كل شيء مجاني!</p>
+          <a href="/courses.html" class="btn btn-accent btn-lg">استعرض الكورسات</a>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+  <script type="module" src="/assets/js/dashboard.js"></script>
+</body>
+</html>
