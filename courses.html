@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Meta Tags for SEO (سيتم تحديثها ديناميكياً) -->
+    <title>الكورسات | أكاديمية عرب فريلانسر</title>
+    <meta name="description" id="meta-description" content="تصفح جميع الكورسات المتاحة في أكاديمية عرب فريلانسر.">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* تنسيقات إضافية لشبكة الكورسات */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .course-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .course-card:hover {
+            transform: translateY(-5px);
+        }
+        .course-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            background-color: var(--border-color); /* لون احتياطي أثناء التحميل */
+        }
+        .course-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .course-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .loading-text {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container nav-container">
+            <a href="/" class="logo">أكاديمية عرب فريلانسر</a>
+            <nav>
+                <a href="index.html" class="btn" style="color: var(--text-color);">ملفي الشخصي</a>
+                <button id="theme-toggle" class="btn" style="background:none; border:1px solid var(--border-color); color:var(--text-color);">تبديل الوضع 🌙</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 style="margin-top: 2rem; border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem; display: inline-block;">الكورسات المتاحة</h1>
+        
+        <!-- سيتم جلب الكورسات ووضعها هنا -->
+        <div id="courses-container" class="courses-grid">
+            <div class="loading-text">جاري تحميل الكورسات...</div>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+        // إعدادات الوضع الليلي المشتركة
+        const themeToggle = document.getElementById('theme-toggle');
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        themeToggle.addEventListener('click', () => {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+        });
+    </script>
+</body>
+</html>
