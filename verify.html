@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>التحقق من الشهادات | أكاديمية عرب فريلانسر</title>
+  <meta name="description" content="صفحة التحقق الرسمية من شهادات أكاديمية عرب فريلانسر — أدخل كود الشهادة للتأكد من صلاحيتها فوراً.">
+  <link rel="canonical" href="https://courses.freelancearab.com/verify.html">
+  <meta property="og:title" content="التحقق من الشهادات | أكاديمية عرب فريلانسر">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/svg+xml" href="/assets/icons/icon.svg">
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('afa-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', t);
+        var m = document.querySelector('meta[name="theme-color"]');
+        if (m) m.setAttribute('content', t === 'dark' ? '#0a101f' : '#ffffff');
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="/assets/css/cert-notif.css">
+</head>
+<body>
+
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="/" class="brand">
+        <img src="/assets/icons/icon.svg" alt="" class="brand-logo" width="42" height="42">
+        <span class="brand-name">أكاديمية <b>عرب فريلانسر</b></span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="التنقل الرئيسي">
+        <a href="/" class="nav-link">الرئيسية</a>
+        <a href="/courses.html" class="nav-link">الكورسات</a>
+        <a href="/dashboard.html" class="nav-link">لوحتي</a>
+        <a href="/verify.html" class="nav-link active">التحقق من شهادة</a>
+      </nav>
+      <div class="header-actions">
+        <button class="theme-toggle" data-theme-toggle aria-label="تبديل الوضع الليلي">
+          <svg class="icon i-sun" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-sun"></use></svg>
+          <svg class="icon i-moon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-moon"></use></svg>
+        </button>
+        <div class="user-chip" data-auth-user hidden>
+          <a href="/profile.html" class="user-chip-link" title="ملفي الشخصي">
+            <img class="user-avatar" data-user-avatar alt="" src="/assets/icons/icon.svg">
+            <span class="user-name" data-user-name>حسابي</span>
+          </a>
+          <button class="icon-btn" data-logout aria-label="تسجيل الخروج" title="تسجيل الخروج">
+            <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-log-out"></use></svg>
+          </button>
+        </div>
+        <a href="/login.html" class="btn btn-outline btn-sm" data-auth-guest hidden>دخول</a>
+        <a href="/register.html" class="btn btn-accent btn-sm" data-auth-guest hidden>ابدأ مجاناً</a>
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-controls="mainNav" aria-label="فتح القائمة">
+          <svg class="icon i-menu" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-menu"></use></svg>
+          <svg class="icon i-x" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container verify-page">
+
+      <div class="verify-head">
+        <div class="shield">
+          <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-shield-check"></use></svg>
+        </div>
+        <h1>التحقق من صلاحية شهادة</h1>
+        <p>للشركات وجهات التوظيف: أدخل كود الشهادة المطبوع عليها للتأكد من صحتها فوراً.</p>
+      </div>
+
+      <div class="card verify-card">
+        <form class="verify-form" id="verifyForm">
+          <input type="text" id="codeInput" class="input" placeholder="AFA-XXXXXX-XXXX"
+                 autocomplete="off" spellcheck="false" aria-label="كود الشهادة" required>
+          <button type="submit" class="btn btn-primary btn-lg" id="verifyBtn">
+            <span class="spinner" aria-hidden="true"></span>
+            تحقق
+          </button>
+        </form>
+
+        <!-- نتيجة التحقق تُحقن هنا -->
+        <div class="verify-result" id="verifyResult"></div>
+      </div>
+
+      <ul class="verify-steps">
+        <li>
+          <span class="num">1</span>
+          <span>اطلب من المرشح كود التحقق الموجود على شهادته (أو رابط التحقق المباشر).</span>
+        </li>
+        <li>
+          <span class="num">2</span>
+          <span>أدخل الكود بالأعلى — التحقق يتم مباشرة من سجلات الأكاديمية الرسمية.</span>
+        </li>
+        <li>
+          <span class="num">3</span>
+          <span>النتيجة تعرض اسم الحاصل واسم الكورس وتاريخ الإصدار — لا توجد شهادات وهمية.</span>
+        </li>
+      </ul>
+
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none;">
+        <p>© <span data-year></span> أكاديمية عرب فريلانسر — جميع الحقوق محفوظة.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/js/theme.js" defer></script>
+  <script src="/assets/js/main.js" defer></script>
+  <script type="module" src="/assets/js/verify.js"></script>
+</body>
+</html>
