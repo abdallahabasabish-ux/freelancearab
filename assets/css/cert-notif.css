@@ -1,0 +1,230 @@
+/* ============================================================
+   cert-notif.css — الشهادات + التحقق + الإشعارات
+   ============================================================ */
+
+[hidden] { display: none !important; }
+
+/* ==================== صفحة الشهادات ==================== */
+.cert-page { padding-block: 2rem 3.5rem; }
+
+.cert-hero {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+  border-radius: var(--radius-lg);
+  color: #fff;
+  position: relative; overflow: hidden;
+}
+.cert-hero::after {
+  content: ""; position: absolute;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: rgba(254, 138, 2, .18);
+  top: -90px; inset-inline-end: -60px;
+}
+.cert-hero .icon-xl { color: var(--accent); flex-shrink: 0; position: relative; }
+.cert-hero h1 { font-size: clamp(1.25rem, 2.8vw, 1.7rem); position: relative; }
+.cert-hero p  { color: rgba(255,255,255,.85); font-size: .92rem; position: relative; }
+
+.email-note {
+  display: flex; gap: .6rem; align-items: flex-start;
+  background: var(--info-soft); color: var(--info);
+  border: 1px solid rgba(2,132,199,.25);
+  border-radius: var(--radius-sm);
+  padding: .85rem 1rem;
+  font-size: .85rem;
+  margin-bottom: 1.75rem;
+}
+.email-note .icon { flex-shrink: 0; margin-top: .1rem; }
+
+.certs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+.cert-card { overflow: hidden; display: flex; flex-direction: column; }
+
+.cert-top {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  padding: 1.5rem 1.4rem 1.25rem;
+  position: relative;
+}
+.cert-top::after {
+  content: ""; position: absolute;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: rgba(254,138,2,.15);
+  bottom: -60px; inset-inline-end: -40px;
+}
+.cert-ribbon {
+  position: absolute; top: 1rem; inset-inline-end: 1rem;
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(255,255,255,.14);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--accent);
+}
+.cert-label { font-size: .75rem; font-weight: 700; color: rgba(255,255,255,.7); letter-spacing: .5px; }
+.cert-course { font-weight: 900; font-size: 1.1rem; margin-top: .2rem; position: relative; z-index: 1; }
+.cert-owner { font-size: .88rem; color: rgba(255,255,255,.85); margin-top: .15rem; }
+
+.cert-body { padding: 1.25rem 1.4rem; display: flex; flex-direction: column; gap: .9rem; flex: 1; }
+
+.cert-code-box {
+  display: flex; align-items: center; gap: .5rem;
+  background: var(--surface-2);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  padding: .6rem .75rem;
+}
+.cert-code-box .code {
+  flex: 1; font-family: 'Courier New', monospace;
+  font-weight: 900; letter-spacing: 1px; direction: ltr;
+  font-size: .95rem; color: var(--primary-ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.copy-code {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 8px; border: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); background: transparent;
+  transition: color var(--transition), background var(--transition);
+}
+.copy-code:hover { color: var(--accent); background: var(--accent-soft); }
+
+.cert-date { font-size: .8rem; color: var(--text-3); display: flex; align-items: center; gap: .4rem; }
+.cert-date .icon { color: var(--accent); }
+
+.cert-actions { margin-top: auto; display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.cert-actions .btn-pdf { grid-column: 1 / -1; }
+
+/* ==================== صفحة التحقق ==================== */
+.verify-page {
+  max-width: 640px;
+  padding-block: 2.5rem 4rem;
+}
+.verify-head { text-align: center; margin-bottom: 2rem; }
+.verify-head .shield {
+  width: 84px; height: 84px; border-radius: 50%;
+  background: var(--primary-soft); color: var(--primary-ink);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.1rem;
+}
+.verify-head h1 { font-size: clamp(1.4rem, 3vw, 1.9rem); margin-bottom: .4rem; }
+.verify-head p  { color: var(--text-2); }
+
+.verify-card { padding: 1.75rem; }
+.verify-form { display: flex; gap: .6rem; }
+.verify-form .input {
+  flex: 1; font-family: 'Courier New', monospace;
+  font-weight: 800; letter-spacing: 2px; direction: ltr; text-align: center;
+  font-size: 1.05rem; text-transform: uppercase;
+}
+@media (max-width: 480px) { .verify-form { flex-direction: column; } }
+
+.verify-result { margin-top: 1.5rem; }
+
+.vr-card {
+  border-radius: var(--radius-lg);
+  border: 2px solid;
+  padding: 1.75rem;
+  text-align: center;
+  animation: vrIn .35s ease;
+}
+@keyframes vrIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.vr-valid   { border-color: var(--success); background: var(--success-soft); }
+.vr-invalid { border-color: var(--danger);  background: var(--danger-soft); }
+.vr-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto .9rem;
+  color: #fff;
+}
+.vr-valid .vr-icon   { background: var(--success); }
+.vr-invalid .vr-icon { background: var(--danger); }
+.vr-title { font-size: 1.2rem; font-weight: 900; margin-bottom: .3rem; }
+.vr-valid .vr-title { color: var(--success); }
+.vr-invalid .vr-title { color: var(--danger); }
+.vr-sub { font-size: .88rem; color: var(--text-2); margin-bottom: 1.25rem; }
+
+.vr-details {
+  text-align: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.15rem 1.25rem;
+  margin-bottom: 1.1rem;
+}
+.vr-details li {
+  display: flex; justify-content: space-between; gap: 1rem;
+  padding-block: .45rem;
+  font-size: .9rem;
+}
+.vr-details li + li { border-top: 1px dashed var(--border); }
+.vr-details .k { color: var(--text-2); flex-shrink: 0; }
+.vr-details .v { font-weight: 800; text-align: end; overflow-wrap: anywhere; }
+.vr-details .v.mono { font-family: 'Courier New', monospace; letter-spacing: 1px; direction: ltr; }
+
+.vr-actions { display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+
+.verify-steps {
+  margin-top: 2.5rem;
+  display: grid; gap: .9rem;
+}
+.verify-steps li {
+  display: flex; gap: .8rem; align-items: flex-start;
+  font-size: .9rem; color: var(--text-2);
+}
+.verify-steps .num {
+  width: 26px; height: 26px; flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--accent-soft); color: var(--accent);
+  font-weight: 900; font-size: .8rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ==================== صفحة الإشعارات ==================== */
+.notif-page { max-width: 720px; padding-block: 2rem 3.5rem; }
+
+.notif-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+}
+.notif-toolbar h1 { font-size: 1.4rem; }
+.notif-count { font-size: .85rem; color: var(--text-2); }
+
+.notif-list { display: flex; flex-direction: column; }
+.notif-item {
+  display: flex; gap: .9rem; align-items: flex-start;
+  padding: 1.1rem .5rem;
+  border-bottom: 1px dashed var(--border);
+  cursor: pointer;
+  transition: background var(--transition);
+  border-radius: var(--radius-sm);
+}
+.notif-item:hover { background: var(--surface-2); }
+.notif-item.unread { background: var(--primary-soft); }
+.notif-item.unread:hover { background: var(--primary-soft); }
+
+.notif-ico {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.notif-ico.certificate { background: var(--accent-soft);  color: var(--accent); }
+.notif-ico.course      { background: var(--primary-soft); color: var(--primary-ink); }
+.notif-ico.system      { background: var(--info-soft);    color: var(--info); }
+
+.notif-body { flex: 1; min-width: 0; }
+.notif-title { font-weight: 800; font-size: .95rem; }
+.notif-item.unread .notif-title::after {
+  content: "";
+  display: inline-block;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent);
+  margin-inline-start: .45rem;
+  vertical-align: middle;
+}
+.notif-text { font-size: .88rem; color: var(--text-2); margin-top: .2rem; }
+.notif-time { font-size: .75rem; color: var(--text-3); margin-top: .35rem; }
+.notif-arrow { color: var(--text-3); flex-shrink: 0; align-self: center; }
