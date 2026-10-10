@@ -501,7 +501,12 @@ async function saveCourse() {
     saveStage = 'حفظ الكورس والدروس والاختبارات في Firestore';
     await commitInChunks(operations);
 
-    toast('تم حفظ الكورس بنجاح ✅', 'success');
+    const quizLessons = S.modules.flatMap((module) => module.lessons)
+      .filter((lesson) => lesson.quizQuestions?.length);
+    const quizNotice = quizLessons.length
+      ? ` تم حفظ ${quizLessons.length} اختباراً في courses/${S.courseId}/lessons/${quizLessons[0]._id}/quiz/current (حقل questions).`
+      : '';
+    toast(`تم حفظ الكورس بنجاح ✅${quizNotice}`, 'success', 8000);
     showList();
   } catch (err) {
     console.error(`تعذر حفظ الكورس في المشروع freelance-arab للمدير ${ctx?.user?.uid || 'غير معروف'} أثناء ${saveStage}:`, err);
