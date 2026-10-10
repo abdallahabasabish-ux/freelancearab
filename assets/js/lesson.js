@@ -19,11 +19,11 @@ const S = {
   user: null, course: null, flat: [],
   lessonId: null, current: null,
   completed: [], points: 0,
-  quiz: null,
+  quiz: null, quizCompleted: false,
   editingNoteId: null
 };
 let latestNotes = [];
-let player = null, playerReady = false, hasVideo = false;
+let player = null, playerReady = false, hasVideo = false, videoEnded = false;
 
 const ctx = await requireAuth();
 if (ctx) main(ctx);
@@ -192,6 +192,7 @@ function renderVideo(videoId) {
   const frame = $('#videoFrame');
 
   if (!hasVideo) {
+    videoEnded = true;
     frame.innerHTML = `
       <div class="video-none">
         <svg class="icon icon-xl" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-video"></use></svg>
@@ -207,9 +208,16 @@ function renderVideo(videoId) {
       videoId: vid,
       host: 'https://www.youtube-nocookie.com', /* وضع الخصوصية المحسّن */
       playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
-      events: { onReady: onVideoReady }
+      events: { onReady: onVideoReady, onStateChange: onVideoStateChange }
     });
   });
+}
+
+function onVideoStateChange(event) {
+  if (event.data !== window.YT.PlayerState.ENDED) return;
+  videoEnded = true;
+  if (S.quiz) $('#lessonQuizSection').hidden = false;
+  renderCompleteState();
 }
 
 function onVideoReady() {
@@ -254,7 +262,7 @@ function renderLessonQuiz(quiz, previousAttempt) {
   const section = $('#lessonQuizSection');
   const form = $('#lessonQuizForm');
   const questions = $('#lessonQuizQuestions');
-  section.hidden = false;
+  section.hidden = hasVideo && !videoEnded;
   questions.innerHTML = quiz.questions.map((question, index) => `
     <fieldset class="quiz-question">
       <legend>${index + 1}. ${escapeHtml(question.prompt || '')}</legend>
@@ -308,11 +316,13 @@ function renderLessonQuiz(quiz, previousAttempt) {
 }
 
 function showQuizResult(result) {
+  S.quizCompleted = true;
   $('#lessonQuizForm').hidden = true;
   const feedback = $('#lessonQuizResult');
   feedback.className = `quiz-result ${result.passed ? 'passed' : 'failed'}`;
   feedback.textContent = `نتيجتك ${result.correct} من ${result.total} (${result.percentage}%). ${result.passed ? 'ناجح، تجاوزت حد النجاح 50%.' : 'لم تصل إلى حد النجاح 50%.'} تم استخدام المحاولة الوحيدة.`;
   feedback.hidden = false;
+  renderCompleteState();
 }
 
 function showQuizMessage(message, isError = false) {
@@ -336,11 +346,18 @@ function renderActions() {
 
 function renderCompleteState() {
   const done = S.completed.includes(S.lessonId);
+  const videoIncomplete = hasVideo && !videoEnded;
+  const quizIncomplete = !!S.quiz && !S.quizCompleted;
   const btn = $('#completeBtn');
   btn.classList.toggle('done', done);
+  btn.disabled = !done && (videoIncomplete || quizIncomplete);
   btn.innerHTML = done
     ? `<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check-circle"></use></svg> مكتمل — إلغاء الإتمام؟`
-    : `<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check"></use></svg> إتمام الدرس (+${POINTS_PER_LESSON} نقاط)`;
+    : videoIncomplete
+      ? 'أكمل مشاهدة الفيديو أولاً'
+      : quizIncomplete
+        ? 'أكمل الاختبار أولاً'
+        : `<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-check"></use></svg> إتمام الدرس (+${POINTS_PER_LESSON} نقاط)`;
 }
 
 function renderProgressUI() {
