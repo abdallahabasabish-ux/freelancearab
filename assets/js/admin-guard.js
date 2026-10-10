@@ -7,17 +7,21 @@ import { db } from './firebase-config.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { requireAuth, initHeaderAuth } from './auth.js';
 
+const ADMIN_UID = 'NOZnMklGITWjF3ei05nxIcCyQs43';
+
 export async function requireAdmin() {
   const ctx = await requireAuth({ allowIncomplete: true }); /* المصادقة والبريد مطلوبان، لا يلزم ملف طالب للمدير */
   if (!ctx) return null;
 
-  let isAdmin = false;
+  let isAdmin = ctx.user.uid === ADMIN_UID;
   let adminCheckError = null;
-  try {
-    isAdmin = (await getDoc(doc(db, 'admins', ctx.user.uid))).exists();
-  } catch (err) {
-    adminCheckError = err;
-    console.error('تعذر التحقق من صلاحية المدير:', err);
+  if (!isAdmin) {
+    try {
+      isAdmin = (await getDoc(doc(db, 'admins', ctx.user.uid))).exists();
+    } catch (err) {
+      adminCheckError = err;
+      console.error('تعذر التحقق من صلاحية المدير:', err);
+    }
   }
 
   if (!isAdmin) {

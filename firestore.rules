@@ -12,10 +12,11 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.email_verified == true;
     }
 
-    /* الإدارة: يُضاف UID المسؤول كمستند داخل مجموعة admins يدوياً من الكونسول */
+    /* المدير الأساسي محدد بالـUID؛ ويمكن إضافة مسؤولين آخرين عبر مجموعة admins */
     function isAdmin() {
       return isSignedIn() &&
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+        (request.auth.uid == 'NOZnMklGITWjF3ei05nxIcCyQs43' ||
+         exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }
 
     /* ================= المسؤولون ================= */

@@ -91,6 +91,18 @@ test('administrators can save and delete courses, lessons, and quizzes', async (
   await assertSucceeds(deleteBatch.commit());
 });
 
+test('the configured admin UID can manage courses without an admins document', async () => {
+  const adminDb = env.authenticatedContext('NOZnMklGITWjF3ei05nxIcCyQs43').firestore();
+  const courseRef = doc(adminDb, 'courses/configured-admin-course');
+  await assertSucceeds(setDoc(courseRef, { title: 'كورس المدير', status: 'draft' }));
+
+  const publicDb = env.authenticatedContext('regular-user').firestore();
+  await assertFails(setDoc(doc(publicDb, 'courses/unauthorized-course'), {
+    title: 'كورس غير مصرح',
+    status: 'draft'
+  }));
+});
+
 test('students can read and save their own course progress', async () => {
   const db = env.authenticatedContext('student-user').firestore();
   const progressRef = doc(db, 'progress/student-user__course-1');
