@@ -1,1 +1,114 @@
+rules_version = '2';
 
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* ================= دوال مساعدة ================= */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    /* المدير الأساسي محدد بالـUID؛ ويمكن إضافة مسؤولين آخرين عبر مجموعة admins */
+    function isAdmin() {
+      return isSignedIn() &&
+        (request.auth.uid == 'NOZnMklGITWjF3ei05nxIcCyQs43' ||
+         exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
+    }
+
+    /* ================= المسؤولون ================= */
+    match /admins/{uid} {
+      allow read: if isSignedIn() && request.auth.uid == uid;
+      allow write: if false; // تُدار يدوياً من Firebase Console فقط
+    }
+
+    /* ================= ملفات الطلاب ================= */
+    match /users/{uid} {
+      allow read:   if isSignedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update: if (isSignedIn() && request.auth.uid == uid) || isAdmin();
+      allow delete: if isAdmin();
+
+      match /quizAttempts/{attemptId} {
+        allow read: if isSignedIn() && request.auth.uid == uid;
+        allow write: if false;
+      }
+    }
+
+    /* ================= الجلسات (منع مشاركة الحساب) ================= */
+    match /sessions/{sessionId} {
+      allow read:   if isSignedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    /* ================= الكورسات ================= */
+    match /courses/{courseId} {
+      allow read:  if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+
+      /* الدروس — isPublished حقل منسوخ من حالة الكورس (بدون get() لتوفير القراءات) */
+      match /lessons/{lessonId} {
+        allow read:  if isAdmin() || (isSignedIn() && resource.data.isPublished == true);
+        allow write: if isAdmin();
+
+        match /quiz/{quizId} {
+          allow get: if isAdmin() || (
+            isVerified() &&
+            get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'published' &&
+            get(/databases/$(database)/documents/courses/$(courseId)/lessons/$(lessonId)).data.isPublished == true
+          );
+          allow list: if false;
+          allow write: if isAdmin();
+        }
+
+        match /answerKeys/{answerKeyId} {
+          allow read, write: if isAdmin();
+        }
+      }
+    }
+
+    /* ================= تقدم الطلاب ================= */
+    match /progress/{docId} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && (resource == null || resource.data.uid == request.auth.uid));
+      allow create, update: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow delete: if false;
+    }
+
+    /* ================= الملاحظات الزمنية ================= */
+    match /notes/{noteId} {
+      allow read:   if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow create: if isSignedIn() && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isSignedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    /* ================= الشهادات (قراءة عامة لصفحة التحقق بالكود) ================= */
+    match /certificates/{certId} {
+      allow read:  if resource.data.status == 'active';
+      allow write: if isAdmin();
+    }
+
+    /* ================= الإشعارات الداخلية ================= */
+    match /notifications/{notifId} {
+      allow read:   if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow update: if isSignedIn() && resource.data.uid == request.auth.uid; // تعليم كمقروء
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    /* ================= إحصائيات عامة (للصفحة الرئيسية) ================= */
+    match /stats/{docId} {
+      allow read:  if true;
+      allow write: if isAdmin();
+    }
+
+    /* ================= منع أي وصول آخر ================= */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
