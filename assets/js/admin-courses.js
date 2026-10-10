@@ -242,7 +242,7 @@ function lessonHTML(l, mi, li) {
       <button type="button" class="icon-btn" data-act="toggle-extra" title="تفاصيل الدرس">
         <svg class="icon chev" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-chevron-down"></use></svg>
       </button>
-      <button type="button" class="icon-btn" data-act="del-lesson" title="حذف الدرس" style="color:var(--danger);">
+      <button type="button" class="icon-btn" data-act="del-lesson" data-m="${mi}" data-l="${li}" title="حذف الدرس" style="color:var(--danger);">
         <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-trash"></use></svg>
       </button>
     </div>
@@ -320,13 +320,19 @@ function bindBuilderEvents() {
     const mi = +btn.dataset.m;
     const li = btn.dataset.l !== undefined ? +btn.dataset.l : null;
     const ai = btn.dataset.a !== undefined ? +btn.dataset.a : null;
+    const module = S.modules[mi];
 
-    if (act === 'add-lesson')   { S.modules[mi].lessons.push(newLesson()); renderBuilder(); }
-    else if (act === 'del-lesson')   { S.modules[mi].lessons.splice(li, 1); renderBuilder(); }
+    if (!module) {
+      console.error('تعذر تنفيذ إجراء محرر الكورس: مؤشر الفصل غير صالح.', { act, mi });
+      return;
+    }
+
+    if (act === 'add-lesson')   { module.lessons.push(newLesson()); renderBuilder(); }
+    else if (act === 'del-lesson' && Number.isInteger(li) && module.lessons[li])   { module.lessons.splice(li, 1); renderBuilder(); }
     else if (act === 'del-module')   { S.modules.splice(mi, 1); renderBuilder(); }
-    else if (act === 'add-att')      { S.modules[mi].lessons[li].attachments.push({ title: '', url: '' }); renderBuilder(); }
-    else if (act === 'del-att')      { S.modules[mi].lessons[li].attachments.splice(ai, 1); renderBuilder(); }
-    else if (act === 'add-quiz')     { S.modules[mi].lessons[li].quizQuestions = defaultQuizQuestions(); renderBuilder(); }
+    else if (Number.isInteger(li) && module.lessons[li] && act === 'add-att') { module.lessons[li].attachments.push({ title: '', url: '' }); renderBuilder(); }
+    else if (Number.isInteger(li) && module.lessons[li] && Number.isInteger(ai) && act === 'del-att') { module.lessons[li].attachments.splice(ai, 1); renderBuilder(); }
+    else if (Number.isInteger(li) && module.lessons[li] && act === 'add-quiz') { module.lessons[li].quizQuestions = defaultQuizQuestions(); renderBuilder(); }
     else if (act === 'toggle-extra') {
       const card = btn.closest('.lesson-card');
       const extra = card.querySelector('.lesson-extra');
@@ -489,10 +495,10 @@ async function saveCourse() {
     toast('تم حفظ الكورس بنجاح ✅', 'success');
     showList();
   } catch (err) {
-    console.error(err);
+    console.error(`تعذر حفظ الكورس في المشروع freelance-arab للمدير ${ctx?.user?.uid || 'غير معروف'} أثناء ${saveStage}:`, err);
     const code = err?.code || 'unknown';
     const message = code === 'permission-denied'
-      ? 'رفضت قواعد Firestore الحفظ. تأكد من نشر firestore.rules على مشروع freelance-arab، ومن وجود مستند admins/{UID حسابك}.'
+      ? `رفضت قواعد Firestore الحفظ. تحقق من نشر firestore.rules على مشروع freelance-arab ومن وجود admins/${ctx?.user?.uid || '{UID حسابك}'}.`
       : 'تحقق من اتصال الإنترنت ثم حاول مجدداً.';
     toast(`تعذر الحفظ أثناء ${saveStage}. ${message} (${code})`, 'error');
   } finally {
