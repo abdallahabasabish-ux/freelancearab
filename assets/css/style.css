@@ -252,37 +252,50 @@ html.theme-switching .feature-card {
 
 /* ---------- 6) الهيدر ---------- */
 .site-header {
-  position: sticky; top: 0; z-index: 1000;
+  position: sticky; top: 0; z-index: 1100;
   background: var(--header-bg);
   -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid transparent;
+  border-bottom: 1px solid var(--border);
   transition: box-shadow var(--transition), border-color var(--transition),
               background var(--transition);
 }
-.site-header.scrolled { border-color: var(--border); box-shadow: var(--shadow-sm); }
+.site-header::after {
+  position: absolute; inset-inline-start: max(1.25rem, calc((100vw - var(--container)) / 2 + 1.25rem)); bottom: -1px;
+  width: 3.5rem; height: 2px; background: var(--accent); content: "";
+}
+.site-header.scrolled { box-shadow: var(--shadow-sm); }
 
 .header-inner {
-  display: flex; align-items: center; gap: 1.25rem;
-  height: var(--header-h);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center; gap: 1.5rem;
+  height: 76px;
 }
 
-.brand { display: flex; align-items: center; gap: .65rem; font-weight: 800; font-size: 1.1rem; }
-.brand-logo { width: 42px; height: 42px; border-radius: 12px; box-shadow: var(--shadow-sm); }
+.brand { display: flex; align-items: center; gap: .7rem; min-width: 0; font-weight: 800; font-size: 1.02rem; }
+.brand-logo { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 11px; box-shadow: var(--shadow-sm); }
 .brand-name b { color: var(--accent); }
 
-.main-nav { display: flex; align-items: center; gap: .25rem; margin-inline-start: auto; }
+.main-nav {
+  display: flex; align-items: center; justify-self: center; gap: .2rem;
+  margin: 0; padding: .25rem;
+  border: 1px solid var(--border); border-radius: 11px;
+  background: var(--surface-2);
+}
 
 .nav-link {
-  padding: .5rem .9rem;
-  border-radius: var(--radius-sm);
-  font-weight: 600; color: var(--text-2);
-  transition: color var(--transition), background var(--transition);
+  position: relative; padding: .55rem .85rem;
+  border-radius: 8px; font-size: .9rem;
+  font-weight: 700; color: var(--text-2);
+  transition: color var(--transition), background var(--transition), box-shadow var(--transition);
 }
 .nav-link:hover { color: var(--text); background: var(--surface-2); }
-.nav-link.active { color: var(--primary-ink); background: var(--primary-soft); }
+.nav-link.active {
+  color: var(--primary-ink); background: var(--surface);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .1);
+}
 
-.header-actions { display: flex; align-items: center; gap: .6rem; }
+.header-actions { display: flex; align-items: center; justify-self: start; gap: .4rem; }
 
 .user-chip { display: flex; align-items: center; gap: .5rem; }
 .user-chip-link { display: flex; align-items: center; gap: .5rem; border-radius: 999px; }
@@ -309,6 +322,11 @@ html.theme-switching .feature-card {
   transition: color var(--transition), border-color var(--transition);
 }
 .theme-toggle:hover, .menu-toggle:hover, .account-menu-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.header-actions .theme-toggle, .header-actions .account-menu-toggle {
+  border-color: transparent; background: transparent;
+}
+.header-actions .btn { min-height: 40px; padding: .5rem .95rem; border-radius: 9px; box-shadow: none; }
+.header-actions .btn:hover { box-shadow: none; }
 
 .account-drawer-backdrop {
   position: fixed; inset: 0; z-index: 1200;
@@ -364,7 +382,10 @@ html.theme-switching .feature-card {
 
 /* ---------- 7) القائمة الجوالة ---------- */
 @media (max-width: 991px) {
-  .header-inner { position: relative; padding-left: 3.25rem; }
+  .header-inner {
+    position: relative; display: flex; justify-content: space-between;
+    gap: .75rem; height: 68px; padding-left: 3.25rem;
+  }
   .menu-toggle {
     position: absolute; left: 0; top: 50%;
     display: inline-flex; transform: translateY(-50%);
@@ -388,7 +409,9 @@ html.theme-switching .feature-card {
 
 @media (max-width: 639px) {
   .header-actions .btn-login { display: none; }
-  .brand-name { font-size: .95rem; }
+  .brand-name { font-size: .93rem; }
+  .brand-logo { width: 38px; height: 38px; flex-basis: 38px; }
+  .header-actions .btn { min-height: 38px; padding-inline: .75rem; font-size: .8rem; }
 }
 
 @media (max-width: 480px) {

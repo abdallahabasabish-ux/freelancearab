@@ -33,7 +33,8 @@ exports.submitLessonQuiz = onCall({
   const keyRef = db.doc(`${lessonPath}/answerKeys/current`);
   const attemptRef = db.doc(`users/${uid}/quizAttempts/${courseId}__${lessonId}`);
 
-  return db.runTransaction(async (transaction) => {
+  try {
+    return await db.runTransaction(async (transaction) => {
     const [attemptSnap, courseSnap, lessonSnap, quizSnap, keySnap] = await Promise.all([
       transaction.get(attemptRef),
       transaction.get(courseRef),
@@ -87,6 +88,11 @@ exports.submitLessonQuiz = onCall({
       ...result,
       submittedAt: FieldValue.serverTimestamp()
     });
-    return result;
-  });
+      return result;
+    });
+  } catch (error) {
+    if (error instanceof HttpsError) throw error;
+    console.error('submitLessonQuiz failed', { uid, courseId, lessonId, error });
+    throw new HttpsError('internal', 'تعذر تصحيح الاختبار بسبب خطأ داخلي.');
+  }
 });

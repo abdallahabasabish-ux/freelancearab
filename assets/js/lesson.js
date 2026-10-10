@@ -305,10 +305,18 @@ function renderLessonQuiz(quiz, previousAttempt) {
           console.error('تعذر تحميل نتيجة الاختبار السابقة:', readError);
         }
       }
-      console.error('تعذر تصحيح الاختبار:', err);
-      showQuizMessage(err.code === 'functions/not-found'
-        ? 'خدمة تصحيح الاختبارات لم تُفعّل بعد.'
-        : 'تعذر تصحيح الاختبار الآن. لم تُحفظ محاولة؛ حاول مجدداً.', true);
+      console.error('تعذر تصحيح الاختبار:', {
+        code: err.code,
+        message: err.message,
+        details: err.details
+      });
+      const messages = {
+        'functions/not-found': 'خدمة تصحيح الاختبارات غير منشورة أو غير متاحة حالياً.',
+        'functions/internal': 'واجهت خدمة التصحيح خطأً داخلياً. لم تُسجّل المحاولة؛ أعد المحاولة لاحقاً، وإذا استمر الخطأ تواصل مع الدعم.',
+        'functions/unavailable': 'خدمة التصحيح غير متاحة مؤقتاً. لم تُسجّل المحاولة؛ حاول لاحقاً.',
+        'functions/deadline-exceeded': 'انتهت مهلة تصحيح الاختبار. لم تُسجّل المحاولة؛ حاول مجدداً.'
+      };
+      showQuizMessage(messages[err.code] || 'تعذر تصحيح الاختبار الآن. لم تُحفظ محاولة؛ حاول مجدداً.', true);
       button.disabled = false;
       button.classList.remove('loading');
     }
