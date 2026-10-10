@@ -317,13 +317,28 @@ function bindBuilderEvents() {
     const btn = e.target.closest('[data-act]');
     if (!btn) return;
     const act = btn.dataset.act;
-    const mi = +btn.dataset.m;
+
+    if (act === 'toggle-extra') {
+      const card = btn.closest('.lesson-card');
+      const extra = card?.querySelector('.lesson-extra');
+      if (!extra) {
+        console.error('تعذر فتح تفاصيل الدرس: عنصر التفاصيل غير موجود.');
+        return;
+      }
+      extra.hidden = !extra.hidden;
+      card.classList.toggle('open', !extra.hidden);
+      return;
+    }
+
+    const mi = btn.dataset.m !== undefined ? Number(btn.dataset.m) : -1;
     const li = btn.dataset.l !== undefined ? +btn.dataset.l : null;
     const ai = btn.dataset.a !== undefined ? +btn.dataset.a : null;
     const module = S.modules[mi];
 
-    if (!module) {
-      console.error('تعذر تنفيذ إجراء محرر الكورس: مؤشر الفصل غير صالح.', { act, mi });
+    if (!Number.isInteger(mi) || !module) {
+      console.error('تعذر تنفيذ إجراء محرر الكورس: مؤشر الفصل غير صالح.', {
+        act, mi, availableModules: S.modules.length
+      });
       return;
     }
 
@@ -333,12 +348,6 @@ function bindBuilderEvents() {
     else if (Number.isInteger(li) && module.lessons[li] && act === 'add-att') { module.lessons[li].attachments.push({ title: '', url: '' }); renderBuilder(); }
     else if (Number.isInteger(li) && module.lessons[li] && Number.isInteger(ai) && act === 'del-att') { module.lessons[li].attachments.splice(ai, 1); renderBuilder(); }
     else if (Number.isInteger(li) && module.lessons[li] && act === 'add-quiz') { module.lessons[li].quizQuestions = defaultQuizQuestions(); renderBuilder(); }
-    else if (act === 'toggle-extra') {
-      const card = btn.closest('.lesson-card');
-      const extra = card.querySelector('.lesson-extra');
-      extra.hidden = !extra.hidden;
-      card.classList.toggle('open', !extra.hidden);
-    }
   });
 
   /* تحديث الحالة دون إعادة رسم (لا فقدان تركيز) */
