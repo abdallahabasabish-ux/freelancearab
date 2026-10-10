@@ -186,7 +186,8 @@ function loadYT() {
 }
 
 function renderVideo(videoId) {
-  const vid = getYoutubeId(String(videoId || ''));
+  const rawVideoId = String(videoId || '').trim();
+  const vid = /^[\w-]{11}$/.test(rawVideoId) ? rawVideoId : getYoutubeId(rawVideoId);
   hasVideo = !!vid;
   const frame = $('#videoFrame');
 
