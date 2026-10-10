@@ -69,6 +69,20 @@
     };
 
     toggle.addEventListener('click', () => {
+      const accountToggle = qs('.account-menu-toggle');
+      const accountChip = qs('[data-auth-user]');
+      if (window.matchMedia('(max-width: 991px)').matches && accountToggle && accountChip && !accountChip.hidden) {
+        const drawer = qs('#accountDrawer');
+        if (drawer?.classList.contains('open')) {
+          drawer.querySelector('[data-account-drawer-close]').click();
+        } else {
+          accountToggle.dataset.returnFocus = 'menuToggle';
+          accountToggle.click();
+          toggle.classList.add('active');
+          toggle.setAttribute('aria-expanded', 'true');
+        }
+        return;
+      }
       const open = nav.classList.toggle('open');
       toggle.classList.toggle('active', open);
       toggle.setAttribute('aria-expanded', String(open));
@@ -76,6 +90,7 @@
 
     nav.addEventListener('click', (e) => { if (e.target.closest('a')) close(); });
     document.addEventListener('click', (e) => {
+      if (qs('#accountDrawer')?.classList.contains('open')) return;
       if (!nav.contains(e.target) && !toggle.contains(e.target)) close();
     });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
@@ -118,13 +133,32 @@
         </button>
       </div>
       <div class="account-drawer-profile"></div>
-      <nav class="account-drawer-nav" aria-label="روابط الحساب">
-        <a href="/profile.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-user"></use></svg><span>ملفي الشخصي</span></a>
-        <a href="/dashboard.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg><span>لوحتي</span></a>
-        <a href="/notifications.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-bell"></use></svg><span>الإشعارات</span></a>
-      </nav>`;
+      <nav class="account-drawer-nav" aria-label="صفحات الموقع"></nav>
+      <div class="account-drawer-settings">
+        <h3>الإعدادات</h3>
+        <div class="account-setting-row">
+          <span>المظهر</span>
+        </div>
+      </div>`;
     drawer.querySelector('.account-drawer-profile').appendChild(chip);
+    const drawerNav = drawer.querySelector('.account-drawer-nav');
+    qs('#mainNav')?.querySelectorAll('a').forEach((link) => {
+      const copy = link.cloneNode(true);
+      copy.classList.remove('nav-link');
+      drawerNav.appendChild(copy);
+    });
+    const notificationsLink = document.createElement('a');
+    notificationsLink.href = '/notifications.html';
+    notificationsLink.innerHTML = '<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-bell"></use></svg><span>الإشعارات</span>';
+    drawerNav.appendChild(notificationsLink);
+
+    const themeToggle = qs('[data-theme-toggle]');
+    const themePlaceholder = themeToggle ? document.createComment('theme-toggle') : null;
+    if (themePlaceholder) themeToggle.after(themePlaceholder);
     document.body.append(backdrop, drawer);
+    qs('#menuToggle')?.setAttribute('aria-controls', 'accountDrawer');
+
+    let returnFocus = toggle;
 
     const close = () => {
       if (!drawer.classList.contains('open')) return;
@@ -133,13 +167,18 @@
       drawer.setAttribute('aria-hidden', 'true');
       drawer.inert = true;
       toggle.setAttribute('aria-expanded', 'false');
+      const menuToggle = qs('#menuToggle');
+      menuToggle?.classList.remove('active');
+      menuToggle?.setAttribute('aria-expanded', 'false');
       document.body.classList.remove('account-drawer-open');
-      toggle.focus();
+      returnFocus.focus();
       window.setTimeout(() => { backdrop.hidden = true; }, 220);
     };
 
     toggle.addEventListener('click', () => {
       if (chip.hidden) return;
+      returnFocus = toggle.dataset.returnFocus === 'menuToggle' ? qs('#menuToggle') : toggle;
+      delete toggle.dataset.returnFocus;
       backdrop.hidden = false;
       drawer.classList.add('open');
       backdrop.classList.add('open');
@@ -158,7 +197,18 @@
       if (event.key === 'Escape') close();
     });
 
-    const syncToggle = () => { toggle.hidden = chip.hidden; };
+    const syncToggle = () => {
+      toggle.hidden = chip.hidden;
+      const menuToggle = qs('#menuToggle');
+      if (menuToggle) {
+        menuToggle.setAttribute('aria-controls', chip.hidden ? 'mainNav' : 'accountDrawer');
+        menuToggle.setAttribute('aria-label', chip.hidden ? 'فتح القائمة' : 'فتح القائمة الجانبية');
+      }
+      if (themeToggle && themePlaceholder?.parentNode) {
+        if (chip.hidden) themePlaceholder.parentNode.insertBefore(themeToggle, themePlaceholder);
+        else drawer.querySelector('.account-setting-row').appendChild(themeToggle);
+      }
+    };
     new MutationObserver(syncToggle).observe(chip, { attributes: true, attributeFilter: ['hidden'] });
     syncToggle();
   }
