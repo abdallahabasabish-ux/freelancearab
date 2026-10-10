@@ -81,6 +81,88 @@
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   }
 
+  /* ============ قائمة الحساب الجانبية ============ */
+  function initAccountDrawer() {
+    const chip = qs('[data-auth-user]');
+    const actions = qs('.header-actions');
+    if (!chip || !actions) return;
+
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'account-menu-toggle';
+    toggle.setAttribute('aria-label', 'فتح قائمة الحساب');
+    toggle.setAttribute('aria-controls', 'accountDrawer');
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.innerHTML = '<svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-user"></use></svg>';
+    actions.insertBefore(toggle, actions.querySelector('[data-theme-toggle]'));
+
+    const backdrop = document.createElement('button');
+    backdrop.type = 'button';
+    backdrop.className = 'account-drawer-backdrop';
+    backdrop.setAttribute('aria-label', 'إغلاق قائمة الحساب');
+    backdrop.hidden = true;
+
+    const drawer = document.createElement('aside');
+    drawer.id = 'accountDrawer';
+    drawer.className = 'account-drawer';
+    drawer.setAttribute('role', 'dialog');
+    drawer.setAttribute('aria-modal', 'true');
+    drawer.setAttribute('aria-labelledby', 'accountDrawerTitle');
+    drawer.setAttribute('aria-hidden', 'true');
+    drawer.inert = true;
+    drawer.innerHTML = `
+      <div class="account-drawer-head">
+        <h2 id="accountDrawerTitle">حسابي</h2>
+        <button type="button" class="icon-btn" data-account-drawer-close aria-label="إغلاق القائمة">
+          <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-x"></use></svg>
+        </button>
+      </div>
+      <div class="account-drawer-profile"></div>
+      <nav class="account-drawer-nav" aria-label="روابط الحساب">
+        <a href="/profile.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-user"></use></svg><span>ملفي الشخصي</span></a>
+        <a href="/dashboard.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-book-open"></use></svg><span>لوحتي</span></a>
+        <a href="/notifications.html"><svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-bell"></use></svg><span>الإشعارات</span></a>
+      </nav>`;
+    drawer.querySelector('.account-drawer-profile').appendChild(chip);
+    document.body.append(backdrop, drawer);
+
+    const close = () => {
+      if (!drawer.classList.contains('open')) return;
+      drawer.classList.remove('open');
+      backdrop.classList.remove('open');
+      drawer.setAttribute('aria-hidden', 'true');
+      drawer.inert = true;
+      toggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('account-drawer-open');
+      toggle.focus();
+      window.setTimeout(() => { backdrop.hidden = true; }, 220);
+    };
+
+    toggle.addEventListener('click', () => {
+      if (chip.hidden) return;
+      backdrop.hidden = false;
+      drawer.classList.add('open');
+      backdrop.classList.add('open');
+      drawer.setAttribute('aria-hidden', 'false');
+      drawer.inert = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('account-drawer-open');
+      drawer.querySelector('[data-account-drawer-close]').focus();
+    });
+    backdrop.addEventListener('click', close);
+    drawer.querySelector('[data-account-drawer-close]').addEventListener('click', close);
+    drawer.addEventListener('click', (event) => {
+      if (event.target.closest('a, [data-logout]')) close();
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+    });
+
+    const syncToggle = () => { toggle.hidden = chip.hidden; };
+    new MutationObserver(syncToggle).observe(chip, { attributes: true, attributeFilter: ['hidden'] });
+    syncToggle();
+  }
+
   /* ============ حالة الاتصال ============ */
   function initConnectionStatus() {
     window.addEventListener('offline', () =>
@@ -118,6 +200,7 @@
   document.addEventListener('DOMContentLoaded', () => {
     initHeader();
     initMobileMenu();
+    initAccountDrawer();
     initConnectionStatus();
     initServiceWorker();
     initMisc();

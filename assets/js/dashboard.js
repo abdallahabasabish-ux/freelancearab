@@ -22,10 +22,12 @@ async function main({ user, profile }) {
 
   $('#statPoints').textContent = Number(profile?.points || 0);
 
-  /* التقدم + الشهادات (استعلام الشهادات جاهز للمرحلة 5) */
-  const [progressList, certsSnap] = await Promise.all([
+  /* التقدم + الشهادات + محاولات الاختبار */
+  const [progressList, certsSnap, quizAttemptsSnap] = await Promise.all([
     fetchAllProgress(user.uid).catch(() => []),
     getDocs(query(collection(db, 'certificates'), where('uid', '==', user.uid), where('status', '==', 'active')))
+      .catch(() => ({ docs: [] })),
+    getDocs(collection(db, 'users', user.uid, 'quizAttempts'))
       .catch(() => ({ docs: [] }))
   ]);
 
@@ -33,6 +35,14 @@ async function main({ user, profile }) {
   const completedLessons = progressList.reduce((n, p) => n + (p.completedLessons?.length || 0), 0);
   $('#statLessons').textContent = completedLessons;
   $('#statCerts').textContent = certsSnap.docs.length;
+  const quizTotals = quizAttemptsSnap.docs.reduce((totals, attempt) => {
+    totals.correct += Number(attempt.data().correct) || 0;
+    totals.total += Number(attempt.data().total) || 0;
+    return totals;
+  }, { correct: 0, total: 0 });
+  $('#statQuizAccuracy').textContent = quizTotals.total
+    ? `${Math.round((quizTotals.correct / quizTotals.total) * 100)}%`
+    : '—';
 
   if (!progressList.length) {
     renderInsights([], { points: Number(profile?.points || 0), completedLessons, certificates: certsSnap.docs.length });
