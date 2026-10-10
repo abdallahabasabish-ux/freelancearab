@@ -503,8 +503,34 @@ async function saveCourse() {
 
     const quizLessons = S.modules.flatMap((module) => module.lessons)
       .filter((lesson) => lesson.quizQuestions?.length);
+    saveStage = 'التحقق من الأسئلة المحفوظة في Firestore';
+    const quizChecks = await Promise.all(quizLessons.map(async (lesson) => {
+      const quizRef = doc(db, 'courses', S.courseId, 'lessons', lesson._id, 'quiz', 'current');
+      const snap = await getDoc(quizRef);
+      const savedQuestions = snap.exists() && Array.isArray(snap.data().questions)
+        ? snap.data().questions
+        : [];
+      const expectedIds = lesson.quizQuestions.map((question) => question.id);
+      const savedIds = savedQuestions.map((question) => question.id);
+      return {
+        lessonId: lesson._id,
+        expectedCount: expectedIds.length,
+        savedCount: savedIds.length,
+        matches: expectedIds.length === savedIds.length && expectedIds.every((id, index) => id === savedIds[index])
+      };
+    }));
+    const failedQuiz = quizChecks.find((check) => !check.matches);
+    if (failedQuiz) {
+      const error = new Error('الأسئلة المحفوظة لا تطابق أسئلة المحرر.');
+      error.code = 'quiz-verification-failed';
+      error.lessonId = failedQuiz.lessonId;
+      error.expectedCount = failedQuiz.expectedCount;
+      error.savedCount = failedQuiz.savedCount;
+      throw error;
+    }
+    const totalQuestionsSaved = quizChecks.reduce((sum, check) => sum + check.savedCount, 0);
     const quizNotice = quizLessons.length
-      ? ` تم حفظ ${quizLessons.length} اختباراً في courses/${S.courseId}/lessons/${quizLessons[0]._id}/quiz/current (حقل questions).`
+      ? ` تم التحقق من حفظ ${totalQuestionsSaved} سؤالاً في ${quizLessons.length} اختبارات. مثال المسار: courses/${S.courseId}/lessons/${quizLessons[0]._id}/quiz/current (حقل questions).`
       : '';
     toast(`تم حفظ الكورس بنجاح ✅${quizNotice}`, 'success', 8000);
     showList();
@@ -513,6 +539,8 @@ async function saveCourse() {
     const code = err?.code || 'unknown';
     const message = code === 'permission-denied'
       ? `رفضت قواعد Firestore الحفظ. تحقق من نشر firestore.rules على مشروع freelance-arab ومن وجود admins/${ctx?.user?.uid || '{UID حسابك}'}.`
+      : code === 'quiz-verification-failed'
+        ? `لم يتم التحقق من حفظ كل الأسئلة في courses/${S.courseId}/lessons/${err.lessonId}/quiz/current. المحرر: ${err.expectedCount}، قاعدة البيانات: ${err.savedCount}.`
       : 'تحقق من اتصال الإنترنت ثم حاول مجدداً.';
     toast(`تعذر الحفظ أثناء ${saveStage}. ${message} (${code})`, 'error');
   } finally {
