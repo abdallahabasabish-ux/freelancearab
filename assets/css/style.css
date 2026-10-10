@@ -364,7 +364,11 @@ html.theme-switching .feature-card {
 
 /* ---------- 7) القائمة الجوالة ---------- */
 @media (max-width: 991px) {
-  .menu-toggle { display: inline-flex; }
+  .header-inner { position: relative; padding-left: 3.25rem; }
+  .menu-toggle {
+    position: absolute; left: 0; top: 50%;
+    display: inline-flex; transform: translateY(-50%);
+  }
   .header-actions .account-menu-toggle { display: none; }
   .main-nav {
     position: fixed;
