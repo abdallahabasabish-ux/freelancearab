@@ -207,7 +207,12 @@ function renderVideo(videoId) {
     player = new YT.Player('playerMount', {
       videoId: vid,
       host: 'https://www.youtube-nocookie.com', /* وضع الخصوصية المحسّن */
-      playerVars: { rel: 0, modestbranding: 1, playsinline: 1 },
+      playerVars: {
+        rel: 0,
+        modestbranding: 1,
+        playsinline: 1,
+        origin: window.location.origin
+      },
       events: { onReady: onVideoReady, onStateChange: onVideoStateChange }
     });
   });
