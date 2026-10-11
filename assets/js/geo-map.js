@@ -5,29 +5,13 @@ const section = document.getElementById('subscriberGeo');
 if (section) {
   const mapElement = document.getElementById('subscriberWorldMap');
   const mapStatus = document.getElementById('geoMapStatus');
-  const list = document.getElementById('geoCountryList');
+  const mapTooltip = document.getElementById('geoMapTooltip');
   const retryButton = document.getElementById('geoRetry');
+  const legend = document.getElementById('geoMapLegend');
+  const updatedLabel = document.getElementById('geoUpdated');
+  const palette = ['#fff1bf', '#ffe08a', '#f6c453', '#e99a32', '#c46b1d'];
   let loading = false;
-  let leafletMap = null;
-  let markers = new Map();
-  let loadedCounts = [];
-
-  const countryCenters = {
-    AE: [24.45, 54.37], AU: [-25.0, 133.0], BH: [26.07, 50.55], BR: [-10.0, -55.0],
-    CA: [56.0, -106.0], CH: [46.8, 8.2], CN: [35.0, 103.0], DE: [51.0, 10.0],
-    DJ: [11.8, 42.6], DZ: [28.0, 2.6], EG: [26.8, 30.8], ES: [40.0, -4.0],
-    FR: [46.0, 2.0], GB: [54.0, -2.0], ID: [-2.0, 118.0], IN: [22.0, 79.0],
-    IQ: [33.0, 44.0], IR: [32.0, 53.0], IT: [42.8, 12.8], JO: [31.2, 36.0],
-    JP: [36.0, 138.0], KE: [0.5, 37.5], KM: [-11.7, 43.3], KR: [36.0, 128.0],
-    KW: [29.4, 47.7], LB: [33.9, 35.9], LY: [26.0, 17.0], MA: [32.0, -6.0],
-    MX: [23.0, -102.0], MY: [4.0, 102.0], NG: [10.0, 8.0], NL: [52.0, 5.0],
-    NO: [62.0, 10.0], NZ: [-41.0, 174.0], OM: [21.0, 57.0], PH: [13.0, 122.0],
-    PK: [30.0, 70.0], PS: [31.9, 35.2], QA: [25.3, 51.2], RU: [61.0, 100.0],
-    SA: [24.0, 45.0], SD: [15.0, 30.0], SE: [62.0, 15.0], SG: [1.3, 103.8],
-    SO: [5.0, 46.0], SY: [35.0, 38.5], TH: [15.0, 101.0], TN: [34.0, 9.0],
-    TR: [39.0, 35.0], TW: [23.7, 121.0], UA: [49.0, 32.0], US: [39.8, -98.6],
-    XK: [42.6, 20.9], YE: [15.5, 47.5], ZA: [-29.0, 24.0]
-  };
+  let mapResources;
 
   function showMapMessage(message, { error = false, retry = false } = {}) {
     mapStatus.textContent = message;
@@ -36,154 +20,138 @@ if (section) {
     retryButton.hidden = !retry;
   }
 
-  function appendEmptyMessage(message) {
-    const item = document.createElement('li');
-    item.className = 'geo-country-empty';
-    item.textContent = message;
-    list.replaceChildren(item);
+  function getCountryCode(properties) {
+    const code = properties.ISO_A2_EH || properties.ISO_A2;
+    if (typeof code === 'string' && /^[A-Z]{2}$/.test(code) && code !== '-99') return code;
+    if (properties.ADM0_A3 === 'KOS') return 'XK';
+    return null;
   }
 
-  function updateSummary(stats) {
-    document.getElementById('geoTotalSubscribers').textContent =
-      Number(stats.totalSubscribers || 0).toLocaleString('ar-EG');
-    document.getElementById('geoOptInSubscribers').textContent =
-      Number(stats.geoOptInSubscribers || 0).toLocaleString('ar-EG');
-    document.getElementById('geoCountryTotal').textContent =
-      stats.countryCounts.length.toLocaleString('ar-EG');
-
-    const updatedAt = stats.updatedAt?.toDate?.();
-    document.getElementById('geoUpdated').textContent = updatedAt
-      ? `آخر تحديث: ${new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(updatedAt)}`
-      : 'وقت التحديث غير متاح';
-  }
-
-  function renderCountryList(counts) {
-    list.replaceChildren();
-    if (!counts.length) {
-      appendEmptyMessage('لا توجد مواقع دول اختيارية ضمن الإحصاءات الحالية.');
-      return;
+  async function loadMapResources() {
+    if (!mapResources) {
+      mapResources = Promise.all([
+        import('https://cdn.jsdelivr.net/npm/d3-geo@3/+esm'),
+        fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+          .then((response) => {
+            if (!response.ok) throw new Error(`تعذر تحميل بيانات حدود الدول (${response.status}).`);
+            return response.json();
+          })
+      ]).then(([geo, countries]) => ({ geo, countries }));
+      mapResources.catch(() => { mapResources = null; });
     }
-
-    counts.forEach((country) => {
-      const item = document.createElement('li');
-      const button = document.createElement('button');
-      const name = document.createElement('span');
-      const count = document.createElement('span');
-
-      button.type = 'button';
-      button.className = 'geo-country-item';
-      button.setAttribute('aria-pressed', 'false');
-      button.setAttribute('aria-label', `${country.name}: ${country.subscribers}`);
-      button.dataset.countryCode = country.code;
-      name.className = 'geo-country-name';
-      name.textContent = country.name;
-      count.className = 'geo-country-count';
-      count.textContent = Number(country.subscribers).toLocaleString('ar-EG');
-      button.append(name, count);
-
-      button.addEventListener('click', () => selectCountry(country.code));
-
-      item.appendChild(button);
-      list.appendChild(item);
-    });
+    return mapResources;
   }
 
-  function selectCountry(code) {
-    const country = loadedCounts.find((entry) => entry.code === code);
-    if (!country) return;
-
-    list.querySelectorAll('.geo-country-item').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.countryCode === code));
-    });
-    const marker = markers.get(code);
-    if (marker && leafletMap) {
-      leafletMap.flyTo(countryCenters[code], Math.max(leafletMap.getZoom(), 4), { duration: .35 });
-      marker.openPopup();
-    } else {
-      showMapMessage(`${country.name}: ${Number(country.subscribers).toLocaleString('ar-EG')} مشترك. لا يتوفر موضع تقريبي لهذه الدولة على الخريطة.`);
-    }
+  function countColor(count, maximum) {
+    const index = Math.min(palette.length - 1, Math.ceil((count / maximum) * palette.length) - 1);
+    return palette[Math.max(0, index)];
   }
 
-  function loadStylesheet() {
-    if (document.querySelector('link[data-leaflet-style]')) return Promise.resolve();
+  function renderLegend(maximum) {
+    legend.replaceChildren();
+    if (!maximum) return;
 
-    return new Promise((resolve, reject) => {
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      link.dataset.leafletStyle = 'true';
-      link.onload = resolve;
-      link.onerror = () => {
-        link.remove();
-        reject(new Error('تعذر تحميل تنسيق الخريطة.'));
-      };
-      document.head.appendChild(link);
+    const entries = [
+      { label: 'أقل', color: palette[0] },
+      { label: '', color: palette[1] },
+      { label: '', color: palette[2] },
+      { label: '', color: palette[3] },
+      { label: 'أكثر', color: palette[4] }
+    ];
+    entries.forEach((entry) => {
+      const item = document.createElement('span');
+      const swatch = document.createElement('span');
+      item.className = 'geo-legend-item';
+      swatch.className = 'geo-legend-swatch';
+      swatch.style.backgroundColor = entry.color;
+      swatch.setAttribute('aria-hidden', 'true');
+      item.append(swatch);
+      if (entry.label) item.append(document.createTextNode(entry.label));
+      legend.append(item);
     });
+    legend.setAttribute('aria-label', `تدرج أعداد المشتركين من الأقل إلى الأكثر، بحد أقصى ${maximum.toLocaleString('ar-EG')}`);
   }
 
-  function loadLeaflet() {
-    if (window.L) return Promise.resolve(window.L);
-
-    return new Promise((resolve, reject) => {
-      const existing = document.querySelector('script[data-leaflet-script]');
-      if (existing) {
-        if (existing.dataset.loadFailed === 'true') existing.remove();
-        else {
-          existing.addEventListener('load', () => resolve(window.L), { once: true });
-          existing.addEventListener('error', () => reject(new Error('تعذر تحميل مكتبة الخريطة.')), { once: true });
-          return;
-        }
-      }
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.dataset.leafletScript = 'true';
-      script.onload = () => window.L ? resolve(window.L) : reject(new Error('لم تبدأ مكتبة الخريطة بشكل صحيح.'));
-      script.onerror = () => {
-        script.dataset.loadFailed = 'true';
-        reject(new Error('تعذر تحميل مكتبة الخريطة.'));
-      };
-      document.head.appendChild(script);
-    });
+  function placeTooltip(event, containerRect) {
+    mapTooltip.style.left = `${event.clientX - containerRect.left}px`;
+    mapTooltip.style.top = `${event.clientY - containerRect.top}px`;
   }
 
   async function renderMap(counts) {
-    await Promise.all([loadStylesheet(), loadLeaflet()]);
-    if (!window.L) throw new Error('مكتبة الخريطة غير متاحة.');
+    const { geo, countries } = await loadMapResources();
+    const width = 1200;
+    const height = 620;
+    const countByCode = new Map(counts.map((country) => [country.code, country]));
+    const maximum = Math.max(0, ...counts.map((country) => country.subscribers));
+    const projection = geo.geoNaturalEarth1().fitExtent(
+      [[18, 18], [width - 18, height - 18]],
+      countries
+    );
+    const path = geo.geoPath(projection);
+    const svgNamespace = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(svgNamespace, 'svg');
 
-    if (leafletMap) leafletMap.remove();
-    markers = new Map();
-    leafletMap = window.L.map(mapElement, {
-      center: [22, 15],
-      zoom: 2,
-      minZoom: 2,
-      maxZoom: 7,
-      scrollWheelZoom: false,
-      preferCanvas: true
+    svg.classList.add('geo-world-svg');
+    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'خريطة العالم الملونة حسب أعداد المشتركين في كل دولة');
+
+    countries.features.forEach((feature) => {
+      const countryPath = document.createElementNS(svgNamespace, 'path');
+      const code = getCountryCode(feature.properties);
+      const country = code ? countByCode.get(code) : null;
+      const subscribers = country?.subscribers || 0;
+      const countryName = feature.properties.NAME_AR || country?.name || feature.properties.ADMIN;
+      const shape = path(feature);
+      if (!shape) return;
+
+      countryPath.classList.add('geo-country');
+      countryPath.setAttribute('d', shape);
+      countryPath.setAttribute('fill', subscribers && maximum ? countColor(subscribers, maximum) : 'var(--surface-2)');
+      countryPath.dataset.subscribers = String(subscribers);
+      countryPath.setAttribute('aria-label', subscribers
+        ? `${countryName}: ${subscribers.toLocaleString('ar-EG')} مشترك`
+        : `${countryName}: لا توجد بيانات مشترِكين`);
+      if (subscribers) countryPath.setAttribute('tabindex', '0');
+
+      const showTooltip = (event) => {
+        const countDescription = subscribers
+          ? `${subscribers.toLocaleString('ar-EG')} مشترك`
+          : 'لا توجد بيانات مشترِكين';
+        mapTooltip.textContent = `${countryName}: ${countDescription}`;
+        mapTooltip.hidden = false;
+        if (event.clientX !== undefined) placeTooltip(event, mapElement.getBoundingClientRect());
+      };
+      const hideTooltip = () => { mapTooltip.hidden = true; };
+      countryPath.addEventListener('pointerenter', showTooltip);
+      countryPath.addEventListener('pointermove', (event) => {
+        if (!mapTooltip.hidden) placeTooltip(event, mapElement.getBoundingClientRect());
+      });
+      countryPath.addEventListener('pointerleave', hideTooltip);
+      countryPath.addEventListener('focus', (event) => {
+        showTooltip(event);
+        const bounds = countryPath.getBoundingClientRect();
+        const container = mapElement.getBoundingClientRect();
+        mapTooltip.style.left = `${bounds.left + bounds.width / 2 - container.left}px`;
+        mapTooltip.style.top = `${bounds.top - container.top}px`;
+      });
+      countryPath.addEventListener('blur', hideTooltip);
+      countryPath.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') hideTooltip();
+      });
+      svg.append(countryPath);
     });
-    window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 7,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
-    }).addTo(leafletMap);
 
-    counts.forEach((country) => {
-      const center = countryCenters[country.code];
-      if (!center) return;
-      const radius = Math.min(18, 7 + Math.log2(country.subscribers));
-      const marker = window.L.circleMarker(center, {
-        radius,
-        color: '#16296b',
-        weight: 2,
-        fillColor: '#f59e0b',
-        fillOpacity: .82
-      }).addTo(leafletMap);
-      const popup = document.createElement('span');
-      popup.textContent = `${country.name}: ${Number(country.subscribers).toLocaleString('ar-EG')}`;
-      marker.bindPopup(popup);
-      markers.set(country.code, marker);
-    });
+    mapElement.querySelector('.geo-world-svg')?.remove();
+    mapElement.prepend(svg);
+    renderLegend(maximum);
+  }
 
-    window.requestAnimationFrame(() => leafletMap.invalidateSize());
-    mapStatus.hidden = true;
+  function showPermissionMessage() {
+    showMapMessage(
+      'رفض Firestore قراءة الإحصاءات العامة. انشر قواعد Firestore الحالية لمشروع freelance-arab ثم أعد المحاولة.',
+      { error: true, retry: true }
+    );
   }
 
   async function loadStats() {
@@ -191,17 +159,14 @@ if (section) {
     loading = true;
     section.setAttribute('aria-busy', 'true');
     retryButton.hidden = true;
-    showMapMessage('جارٍ تحميل الإحصاءات…');
+    updatedLabel.textContent = '';
+    showMapMessage('جارٍ تحميل خريطة العالم والإحصاءات…');
 
     try {
       const snapshot = await getDoc(doc(db, 'publicStats', 'geoSubscribers'));
       if (!snapshot.exists()) {
-        document.getElementById('geoTotalSubscribers').textContent = '—';
-        document.getElementById('geoOptInSubscribers').textContent = '—';
-        document.getElementById('geoCountryTotal').textContent = '—';
-        document.getElementById('geoUpdated').textContent = '—';
-        appendEmptyMessage('لم تُنشر إحصاءات بعد. ستظهر بعد تشغيل التحديث الدوري.');
-        showMapMessage('الإحصاءات الجغرافية غير متاحة بعد.');
+        await renderMap([]);
+        showMapMessage('لا توجد إحصاءات منشورة بعد. ستظهر الخريطة الملونة بعد أول تحديث للبيانات.');
         return;
       }
 
@@ -213,29 +178,25 @@ if (section) {
           Number.isSafeInteger(country.subscribers) &&
           country.subscribers > 0)
         : [];
-      loadedCounts = counts;
-      updateSummary({ ...stats, countryCounts: counts });
-      renderCountryList(counts);
 
-      if (!Number(stats.totalSubscribers) && !counts.length) {
-        showMapMessage('لا توجد اشتراكات مسجلة حتى الآن.');
-        return;
-      }
-      if (!counts.length) {
-        showMapMessage('لا توجد بيانات دولة اختيارية لعرضها على الخريطة.');
-        return;
-      }
+      await renderMap(counts);
+      const updatedAt = stats.updatedAt?.toDate?.();
+      updatedLabel.textContent = updatedAt
+        ? `آخر تحديث: ${new Intl.DateTimeFormat('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }).format(updatedAt)}`
+        : '';
 
-      try {
-        await renderMap(counts);
-      } catch (error) {
-        console.error('تعذر عرض خريطة المشتركين:', error);
-        showMapMessage('تعذر تحميل الخريطة. ما زالت أعداد الدول متاحة في القائمة.', { error: true });
-      }
+      if (!counts.length) showMapMessage('لا توجد بيانات دولة اختيارية ضمن الإحصاءات الحالية.');
+      else mapStatus.hidden = true;
     } catch (error) {
-      console.error('تعذر تحميل إحصاءات المشتركين:', error);
-      appendEmptyMessage('تعذر الاتصال بالخادم لتحميل الإحصاءات.');
-      showMapMessage('تعذر تحميل الإحصاءات. تحقق من الاتصال ثم أعد المحاولة.', { error: true, retry: true });
+      console.error('تعذر تحميل خريطة المشتركين وإحصاءاتها:', error);
+      try {
+        await renderMap([]);
+      } catch (mapError) {
+        console.error('تعذر تحميل حدود خريطة العالم:', mapError);
+      }
+
+      if (error?.code === 'permission-denied') showPermissionMessage();
+      else showMapMessage('تعذر تحميل الخريطة أو الإحصاءات. تحقق من الاتصال ثم أعد المحاولة.', { error: true, retry: true });
     } finally {
       loading = false;
       section.setAttribute('aria-busy', 'false');

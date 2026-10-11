@@ -43,6 +43,7 @@
   <!-- PWA -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#ffffff">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="عرب فريلانسر">
@@ -214,50 +215,23 @@
         <div class="section-head">
           <span class="eyebrow">
             <svg class="icon" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-map-pin"></use></svg>
-            مجتمعنا حول العالم
+            توزيع المشتركين
           </span>
-          <h2>نتعلم معاً من كل مكان</h2>
-          <p>إحصاءات حقيقية مجمعة من الحسابات، وتوزيع جغرافي للدول التي اختار أصحابها مشاركة موقعهم.</p>
+          <h2>مجتمعنا حول العالم</h2>
+          <p>تدرّج الألوان يوضح أعداد المشتركين حسب الدولة، بناءً على بيانات الموقع الاختيارية المجمعة.</p>
         </div>
 
         <div class="geo-panel" id="subscriberGeo" aria-busy="true">
-          <div class="geo-summary" aria-label="إحصائيات المجتمع">
-            <article class="geo-stat">
-              <span class="geo-stat-label">إجمالي المشتركين</span>
-              <strong id="geoTotalSubscribers" class="geo-stat-value" aria-live="polite">—</strong>
-            </article>
-            <article class="geo-stat">
-              <span class="geo-stat-label">شاركوا الدولة اختيارياً</span>
-              <strong id="geoOptInSubscribers" class="geo-stat-value" aria-live="polite">—</strong>
-            </article>
-            <article class="geo-stat">
-              <span class="geo-stat-label">الدول الممثلة</span>
-              <strong id="geoCountryTotal" class="geo-stat-value" aria-live="polite">—</strong>
-            </article>
+          <div id="subscriberWorldMap" class="geo-map" role="group" aria-label="خريطة العالم وتوزيع المشتركين حسب الدولة">
+            <p class="geo-map-status" id="geoMapStatus" role="status">جارٍ تحميل الخريطة والإحصاءات…</p>
+            <div class="geo-map-tooltip" id="geoMapTooltip" role="status" hidden></div>
           </div>
-
-          <div class="geo-content">
-            <div class="geo-map-card">
-              <div class="geo-card-heading">
-                <h3>التوزيع الجغرافي</h3>
-                <span class="badge badge-primary">على مستوى الدولة</span>
-              </div>
-              <div id="subscriberWorldMap" class="geo-map" role="application" aria-label="خريطة تفاعلية لتوزيع المشتركين حسب الدولة">
-                <p class="geo-map-status" id="geoMapStatus" role="status">جارٍ تحميل الإحصاءات…</p>
-              </div>
-            </div>
-            <aside class="geo-country-card" aria-labelledby="geoCountryHeading">
-              <div class="geo-card-heading">
-                <h3 id="geoCountryHeading">المشتركون حسب الدولة</h3>
-                <span id="geoUpdated" class="geo-updated">—</span>
-              </div>
-              <ol class="geo-country-list" id="geoCountryList" aria-live="polite">
-                <li class="geo-country-empty">جارٍ تحميل البيانات…</li>
-              </ol>
-              <button id="geoRetry" class="btn btn-outline btn-sm geo-retry" type="button" hidden>إعادة المحاولة</button>
-            </aside>
+          <div class="geo-map-footer">
+            <div class="geo-map-legend" id="geoMapLegend" aria-label="مفتاح ألوان أعداد المشتركين"></div>
+            <span class="geo-map-updated" id="geoUpdated"></span>
           </div>
-          <p class="geo-privacy">تُعرض أعداد مجمعة فقط، ولا تُعرض مواقع الأفراد أو معلوماتهم الشخصية. تُحدّث الإحصاءات كل 6 ساعات؛ ومؤشرات الخريطة تقريبية عند مركز الدولة. خريطة الأساس مقدمة من OpenStreetMap.</p>
+          <button id="geoRetry" class="btn btn-outline btn-sm geo-retry" type="button" hidden>إعادة المحاولة</button>
+          <p class="geo-privacy">تعرض الخريطة أعدادًا مجمعة حسب الدولة فقط، ولا تعرض مواقع الأفراد أو معلوماتهم الشخصية. تُحدّث الإحصاءات كل 6 ساعات. حدود الدول من بيانات Natural Earth.</p>
         </div>
       </div>
     </section>
