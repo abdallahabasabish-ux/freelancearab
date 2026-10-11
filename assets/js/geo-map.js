@@ -26,7 +26,7 @@ if (section) {
     SA: [24.0, 45.0], SD: [15.0, 30.0], SE: [62.0, 15.0], SG: [1.3, 103.8],
     SO: [5.0, 46.0], SY: [35.0, 38.5], TH: [15.0, 101.0], TN: [34.0, 9.0],
     TR: [39.0, 35.0], TW: [23.7, 121.0], UA: [49.0, 32.0], US: [39.8, -98.6],
-    YE: [15.5, 47.5], ZA: [-29.0, 24.0]
+    XK: [42.6, 20.9], YE: [15.5, 47.5], ZA: [-29.0, 24.0]
   };
 
   function showMapMessage(message, { error = false, retry = false } = {}) {
@@ -93,8 +93,7 @@ if (section) {
     if (!country) return;
 
     list.querySelectorAll('.geo-country-item').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.querySelector('.geo-country-name')?.textContent ===
-        country.name));
+      button.setAttribute('aria-pressed', String(button.dataset.countryCode === code));
     });
     const marker = markers.get(code);
     if (marker && leafletMap) {

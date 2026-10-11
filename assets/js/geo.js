@@ -19,8 +19,7 @@ export function requestLocation({ timeout = 12000 } = {}) {
         try { place = await reverseGeocode(lat, lng); } catch { /* اختياري */ }
         resolve({
           countryCode: place.countryCode,
-          country: place.country,
-          timestamp: Date.now()
+          country: place.country
         });
       },
       (err) => reject(Object.assign(new Error(err.code === 1 ? 'PERMISSION_DENIED' : err.code === 2 ? 'POSITION_UNAVAILABLE' : 'TIMEOUT'))),
@@ -31,16 +30,22 @@ export function requestLocation({ timeout = 12000 } = {}) {
 
 /* ترميز عكسي مجاني عبر OpenStreetMap Nominatim (بدون مفتاح) */
 async function reverseGeocode(lat, lng) {
-  const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=ar&lat=${lat}&lon=${lng}`;
-  const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-  if (!res.ok) throw new Error('GEOCODE_FAIL');
-  const data = res.json ? await res.json() : {};
-  const a = data.address || {};
-  const countryCode = String(a.country_code || '').toUpperCase();
-  return {
-    country: a.country || null,
-    countryCode: /^[A-Z]{2}$/.test(countryCode) ? countryCode : null
-  };
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=ar&lat=${lat.toFixed(1)}&lon=${lng.toFixed(1)}`;
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' }, signal: controller.signal });
+    if (!res.ok) throw new Error('GEOCODE_FAIL');
+    const data = res.json ? await res.json() : {};
+    const a = data.address || {};
+    const countryCode = String(a.country_code || '').toUpperCase();
+    return {
+      country: a.country || null,
+      countryCode: /^[A-Z]{2}$/.test(countryCode) ? countryCode : null
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export const GEO_MESSAGES = {

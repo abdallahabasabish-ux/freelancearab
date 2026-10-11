@@ -25,8 +25,7 @@ function main({ user, profile }) {
   let locData = profile?.location
     ? {
         countryCode: profile.location.countryCode || null,
-        country: profile.location.country || null,
-        timestamp: profile.location.timestamp || null
+        country: profile.location.country || null
       }
     : null;
   let removeLocation = false;

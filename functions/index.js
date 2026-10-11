@@ -2,7 +2,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { FieldPath, FieldValue, getFirestore } = require('firebase-admin/firestore');
 const { HttpsError, onCall } = require('firebase-functions/v2/https');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
-const { createSubscriberGeoAggregator } = require('./geo-stats');
+const { createSubscriberGeoAggregator, hasLegacyGeoData, legacyGeoFields } = require('./geo-stats');
 
 initializeApp();
 const db = getFirestore();
@@ -106,16 +106,28 @@ exports.refreshSubscriberGeoStats = onSchedule({
 }, async () => {
   const aggregator = createSubscriberGeoAggregator();
   let lastUser = null;
+  const legacyFieldPaths = legacyGeoFields.map((field) => `location.${field}`);
 
   while (true) {
     let page = db.collection('users')
-      .select('location.countryCode', 'location.country')
+      .select('location.countryCode', 'location.country', ...legacyFieldPaths)
       .orderBy(FieldPath.documentId())
       .limit(500);
     if (lastUser) page = page.startAfter(lastUser);
 
     const snapshot = await page.get();
-    snapshot.docs.forEach((user) => aggregator.add(user.data()));
+    const cleanup = db.batch();
+    let cleanupCount = 0;
+    snapshot.docs.forEach((user) => {
+      const data = user.data();
+      aggregator.add(data);
+      if (!hasLegacyGeoData(data.location)) return;
+      cleanup.update(user.ref, Object.fromEntries(
+        legacyFieldPaths.map((field) => [field, FieldValue.delete()])
+      ));
+      cleanupCount += 1;
+    });
+    if (cleanupCount) await cleanup.commit();
     if (snapshot.empty || snapshot.size < 500) break;
     lastUser = snapshot.docs[snapshot.docs.length - 1];
   }

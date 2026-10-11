@@ -2,7 +2,11 @@
 
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { aggregateSubscriberGeo, resolveCountryCode } = require('../geo-stats');
+const {
+  aggregateSubscriberGeo,
+  hasLegacyGeoData,
+  resolveCountryCode
+} = require('../geo-stats');
 
 test('country aggregation counts only explicit country-level location records', () => {
   const users = [
@@ -26,6 +30,15 @@ test('country aggregation counts only explicit country-level location records', 
 
 test('country resolution ignores invalid and non-country values', () => {
   assert.equal(resolveCountryCode({ countryCode: 'ZZ', country: 'unknown' }), null);
+  assert.equal(resolveCountryCode({ countryCode: 'EU', country: 'European Union' }), null);
   assert.equal(resolveCountryCode({ countryCode: 'not-a-code', country: '' }), null);
+  assert.equal(resolveCountryCode({ countryCode: 'XK' }), 'XK');
   assert.equal(resolveCountryCode({ country: 'المملكة المتحدة' }), 'GB');
+});
+
+test('legacy precise and city-level locations are identified for migration', () => {
+  assert.equal(hasLegacyGeoData({ countryCode: 'EG', country: 'مصر' }), false);
+  assert.equal(hasLegacyGeoData({ countryCode: 'EG', lat: 30.1, lng: 31.2 }), true);
+  assert.equal(hasLegacyGeoData({ country: 'مصر', city: 'القاهرة' }), true);
+  assert.equal(hasLegacyGeoData(null), false);
 });

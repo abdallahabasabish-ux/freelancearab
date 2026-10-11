@@ -4,19 +4,7 @@
 
 [hidden] { display: none !important; }
 
-/* ---------- صور البطاقات (Lazy + Fade) ---------- */
-.course-media { position: relative; overflow: hidden; }
-.course-badge { z-index: 1; }
-.course-thumb {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity .45s ease;
-}
-.course-thumb.loaded  { opacity: 1; }
-.course-thumb.failed  { display: none; }
-
+/* ---------- وصف البطاقات ---------- */
 .course-desc {
   color: var(--text-2);
   font-size: .9rem;

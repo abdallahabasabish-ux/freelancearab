@@ -16,8 +16,9 @@
     "firebase-tools": "^15.33.0"
   },
   "scripts": {
-    "test": "npm run test:rules && npm run test:integration",
+    "test": "firebase emulators:exec --config ../firebase.json --project demo-freelancearab --only auth,firestore,functions \"node --test test/firestore.rules.test.js test/quiz.integration.test.js test/geo-stats.test.js\"",
     "test:rules": "firebase emulators:exec --project demo-freelancearab --only firestore \"node --test test/firestore.rules.test.js\"",
-    "test:integration": "firebase emulators:exec --project demo-freelancearab --only auth,firestore,functions \"node --test test/quiz.integration.test.js\""
+    "test:integration": "firebase emulators:exec --project demo-freelancearab --only auth,firestore,functions \"node --test test/quiz.integration.test.js\"",
+    "test:geo-stats": "node --test test/geo-stats.test.js"
   }
 }

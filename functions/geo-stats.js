@@ -17,17 +17,19 @@ function normalizeCountryName(value) {
 const validCountryCodes = new Set();
 const countryCodesByName = new Map();
 const unknownRegionNames = new Set(['Unknown Region', 'منطقة غير معروفة']);
+const nonCountryRegionCodes = new Set(['EU', 'UN', 'EZ', 'QO', 'XA', 'XB']);
+const legacyGeoFields = ['lat', 'lng', 'accuracy', 'city', 'timestamp'];
 
 for (let first = 65; first <= 90; first += 1) {
   for (let second = 65; second <= 90; second += 1) {
     const code = String.fromCharCode(first, second);
     const arabicName = arabicRegionNames.of(code);
     const englishName = englishRegionNames.of(code);
-    if (arabicName && !unknownRegionNames.has(arabicName)) {
+    if (arabicName && !unknownRegionNames.has(arabicName) && !nonCountryRegionCodes.has(code)) {
       validCountryCodes.add(code);
       countryCodesByName.set(normalizeCountryName(arabicName), code);
     }
-    if (englishName && !unknownRegionNames.has(englishName)) {
+    if (englishName && !unknownRegionNames.has(englishName) && !nonCountryRegionCodes.has(code)) {
       validCountryCodes.add(code);
       countryCodesByName.set(normalizeCountryName(englishName), code);
     }
@@ -61,6 +63,10 @@ function resolveCountryCode(location) {
 
   const country = normalizeCountryName(location?.country);
   return countryCodesByName.get(country) || null;
+}
+
+function hasLegacyGeoData(location) {
+  return Boolean(location && legacyGeoFields.some((field) => location[field] !== undefined));
 }
 
 function createSubscriberGeoAggregator() {
@@ -98,4 +104,10 @@ function aggregateSubscriberGeo(users) {
   return aggregator.summary();
 }
 
-module.exports = { aggregateSubscriberGeo, createSubscriberGeoAggregator, resolveCountryCode };
+module.exports = {
+  aggregateSubscriberGeo,
+  createSubscriberGeoAggregator,
+  hasLegacyGeoData,
+  legacyGeoFields,
+  resolveCountryCode
+};
