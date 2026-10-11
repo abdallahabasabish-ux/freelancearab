@@ -4,12 +4,13 @@
    ============================================================ */
 
 import { db } from './firebase-config.js';
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+  doc, getDoc, setDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { requireAuth, initHeaderAuth } from './auth.js';
 import { fetchCourseById, escapeHtml, formatDuration, getYoutubeId, safeLinkUrl } from './courses-data.js';
 import { fetchProgress, saveLastLesson, toggleLessonComplete, POINTS_PER_LESSON } from './progress.js';
 import { listenLessonNotes, addNote, updateNoteText, deleteNote } from './notes.js';
-import { quizSubmitEndpoint } from './quiz-api-config.js';
 
 const $ = (s) => document.querySelector(s);
 const toast = (m, t) => window.AFA?.toast(m, t);
@@ -88,7 +89,7 @@ async function main({ user, profile }) {
   if (!lesson || lesson.isPublished !== true)
     return showError('هذا الدرس غير متاح حالياً', 'قد لا يكون منشوراً بعد — جرّب لاحقاً.');
 
-  let quiz = null, quizAttempt = null;
+  let quiz = null, quizAttempt = null, quizAnswerKey = null;
   try {
     const quizSnap = await getDoc(doc(db, 'courses', courseId, 'lessons', S.lessonId, 'quiz', 'current'));
     if (quizSnap.exists() && quizSnap.data().enabled === true) {
@@ -96,6 +97,12 @@ async function main({ user, profile }) {
       const attemptId = `${courseId}__${S.lessonId}`;
       const attemptSnap = await getDoc(doc(db, 'users', user.uid, 'quizAttempts', attemptId));
       if (attemptSnap.exists()) quizAttempt = attemptSnap.data();
+      if (!quizAttempt) {
+        const answerKeySnap = await getDoc(doc(
+          db, 'courses', courseId, 'lessons', S.lessonId, 'answerKeys', 'current'
+        ));
+        if (answerKeySnap.exists()) quizAnswerKey = answerKeySnap.data();
+      }
     }
   } catch (err) {
     console.error('تعذر تحميل اختبار الحلقة:', err);
@@ -115,7 +122,7 @@ async function main({ user, profile }) {
   renderHead(lesson);
   renderVideo(lesson.videoId);
   renderAttachments(lesson.attachments);
-  renderLessonQuiz(quiz, quizAttempt);
+  renderLessonQuiz(quiz, quizAttempt, quizAnswerKey);
   renderActions();
   renderCompleteState();
   renderProgressUI();
@@ -260,7 +267,7 @@ function renderAttachments(list) {
   }).join('');
 }
 
-function renderLessonQuiz(quiz, previousAttempt) {
+function renderLessonQuiz(quiz, previousAttempt, answerKey) {
   if (!quiz || !Array.isArray(quiz.questions) || quiz.questions.length !== 4) return;
   S.quiz = quiz;
 
@@ -297,29 +304,40 @@ function renderLessonQuiz(quiz, previousAttempt) {
     button.disabled = true;
     button.classList.add('loading');
     try {
-      if (!quizSubmitEndpoint) {
-        throw Object.assign(new Error('خدمة تصحيح الاختبارات غير مهيأة.'), {
-          code: 'functions/unavailable'
-        });
+      const correctAnswers = answerKey?.correctByQuestionId;
+      if (!correctAnswers || typeof correctAnswers !== 'object' || Array.isArray(correctAnswers)) {
+        throw new Error('مفتاح الإجابات غير متاح لهذا الاختبار.');
       }
-      const idToken = await S.user.getIdToken();
-      const response = await fetch(quizSubmitEndpoint, {
-        method: 'POST',
-        headers: {
-          authorization: `Bearer ${idToken}`,
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({ courseId: S.course.id, lessonId: S.lessonId, answers })
+
+      let correct = 0;
+      for (const question of quiz.questions) {
+        const selected = answers[question.id];
+        const correctAnswer = correctAnswers[question.id];
+        const optionIds = (question.options || []).map((option) => option.id);
+        if (!optionIds.includes(selected) || !optionIds.includes(correctAnswer)) {
+          throw new Error('توجد إجابة غير صالحة أو أن إعداد الاختبار غير مكتمل.');
+        }
+        if (selected === correctAnswer) correct += 1;
+      }
+
+      const percentage = Math.round((correct / quiz.questions.length) * 100);
+      const result = {
+        courseId: S.course.id,
+        lessonId: S.lessonId,
+        correct,
+        total: quiz.questions.length,
+        percentage,
+        passPercent: 50,
+        passed: percentage >= 50
+      };
+      const attemptId = `${S.course.id}__${S.lessonId}`;
+      await setDoc(doc(db, 'users', S.user.uid, 'quizAttempts', attemptId), {
+        ...result,
+        submittedAt: serverTimestamp()
       });
-      const result = await response.json();
-      if (!response.ok) {
-        throw Object.assign(new Error(result.message || 'تعذر تصحيح الاختبار.'), {
-          code: `functions/${result.code || 'internal'}`
-        });
-      }
       showQuizResult(result);
     } catch (err) {
-      if (err.code === 'functions/already-exists') {
+      if (err.code === 'permission-denied') {
         try {
           const attemptId = `${S.course.id}__${S.lessonId}`;
           const snap = await getDoc(doc(db, 'users', S.user.uid, 'quizAttempts', attemptId));
@@ -328,18 +346,8 @@ function renderLessonQuiz(quiz, previousAttempt) {
           console.error('تعذر تحميل نتيجة الاختبار السابقة:', readError);
         }
       }
-      console.error('تعذر تصحيح الاختبار:', {
-        code: err.code,
-        message: err.message,
-        details: err.details
-      });
-      const messages = {
-        'functions/not-found': 'خدمة تصحيح الاختبارات غير منشورة أو غير متاحة حالياً.',
-        'functions/internal': 'واجهت خدمة التصحيح خطأً داخلياً. لم تُسجّل المحاولة؛ أعد المحاولة لاحقاً، وإذا استمر الخطأ تواصل مع الدعم.',
-        'functions/unavailable': 'خدمة التصحيح غير متاحة مؤقتاً. لم تُسجّل المحاولة؛ حاول لاحقاً.',
-        'functions/deadline-exceeded': 'انتهت مهلة تصحيح الاختبار. لم تُسجّل المحاولة؛ حاول مجدداً.'
-      };
-      showQuizMessage(messages[err.code] || 'تعذر تصحيح الاختبار الآن. لم تُحفظ محاولة؛ حاول مجدداً.', true);
+      console.error('تعذر تصحيح الاختبار:', err);
+      showQuizMessage(err.message || 'تعذر تصحيح الاختبار الآن. لم تُحفظ المحاولة؛ حاول مجدداً.', true);
       button.disabled = false;
       button.classList.remove('loading');
     }

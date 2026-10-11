@@ -7,7 +7,7 @@ const {
   initializeTestEnvironment
 } = require('@firebase/rules-unit-testing');
 const {
-  collection, doc, getDoc, getDocs, setDoc, writeBatch
+  collection, doc, getDoc, getDocs, serverTimestamp, setDoc, writeBatch
 } = require('firebase/firestore');
 
 let env;
@@ -49,19 +49,50 @@ test.after(async () => {
   await env?.cleanup();
 });
 
-test('verified students can read published quizzes and their own attempt only', async () => {
+test('verified students can read published quizzes, answer keys, and their own attempt', async () => {
   const db = env.authenticatedContext('student-user', { email_verified: true }).firestore();
   await assertSucceeds(getDoc(doc(db, `${lessonPath}/quiz/current`)));
+  await assertSucceeds(getDoc(doc(db, `${lessonPath}/answerKeys/current`)));
   await assertSucceeds(getDoc(doc(db, 'users/student-user/quizAttempts/course-1__lesson-1')));
-  await assertFails(getDoc(doc(db, `${lessonPath}/answerKeys/current`)));
-  await assertFails(setDoc(doc(db, 'users/student-user/quizAttempts/new-attempt'), { passed: true }));
+  await assertSucceeds(setDoc(doc(db, 'users/student-user/quizAttempts/course-2__lesson-2'), {
+    courseId: 'course-2',
+    lessonId: 'lesson-2',
+    correct: 2,
+    total: 4,
+    percentage: 50,
+    passPercent: 50,
+    passed: true,
+    submittedAt: serverTimestamp()
+  }));
+  await assertFails(setDoc(doc(db, 'users/student-user/quizAttempts/course-3__lesson-3'), {
+    courseId: 'course-3',
+    lessonId: 'lesson-3',
+    correct: 4,
+    total: 4,
+    percentage: 100,
+    passPercent: 50,
+    passed: true,
+    submittedAt: new Date()
+  }));
+  await assertFails(setDoc(doc(db, 'users/another-user/quizAttempts/course-1__lesson-1'), {
+    courseId: 'course-1',
+    lessonId: 'lesson-1',
+    correct: 2,
+    total: 4,
+    percentage: 50,
+    passPercent: 50,
+    passed: true,
+    submittedAt: new Date()
+  }));
 });
 
 test('unverified and signed-out users cannot read quiz questions', async () => {
   const unverifiedDb = env.authenticatedContext('unverified-user', { email_verified: false }).firestore();
   const publicDb = env.unauthenticatedContext().firestore();
   await assertFails(getDoc(doc(unverifiedDb, `${lessonPath}/quiz/current`)));
+  await assertFails(getDoc(doc(unverifiedDb, `${lessonPath}/answerKeys/current`)));
   await assertFails(getDoc(doc(publicDb, `${lessonPath}/quiz/current`)));
+  await assertFails(getDoc(doc(publicDb, `${lessonPath}/answerKeys/current`)));
 });
 
 test('administrators can read answer keys', async () => {

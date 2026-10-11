@@ -19,6 +19,30 @@ service cloud.firestore {
          exists(/databases/$(database)/documents/admins/$(request.auth.uid)));
     }
 
+    function isValidQuizAttempt(uid, attemptId) {
+      return isVerified() &&
+        request.auth.uid == uid &&
+        request.resource.data.keys().hasAll([
+          'courseId', 'lessonId', 'correct', 'total',
+          'percentage', 'passPercent', 'passed', 'submittedAt'
+        ]) &&
+        request.resource.data.keys().hasOnly([
+          'courseId', 'lessonId', 'correct', 'total',
+          'percentage', 'passPercent', 'passed', 'submittedAt'
+        ]) &&
+        request.resource.data.courseId is string &&
+        request.resource.data.lessonId is string &&
+        attemptId == request.resource.data.courseId + '__' + request.resource.data.lessonId &&
+        request.resource.data.correct is int &&
+        request.resource.data.correct >= 0 &&
+        request.resource.data.correct <= 4 &&
+        request.resource.data.total == 4 &&
+        request.resource.data.percentage == request.resource.data.correct * 25 &&
+        request.resource.data.passPercent == 50 &&
+        request.resource.data.passed == (request.resource.data.percentage >= 50) &&
+        request.resource.data.submittedAt == request.time;
+    }
+
     /* ================= المسؤولون ================= */
     match /admins/{uid} {
       allow read: if isSignedIn() && request.auth.uid == uid;
@@ -34,7 +58,8 @@ service cloud.firestore {
 
       match /quizAttempts/{attemptId} {
         allow read: if isSignedIn() && request.auth.uid == uid;
-        allow write: if false;
+        allow create: if isValidQuizAttempt(uid, attemptId);
+        allow update, delete: if false;
       }
     }
 
@@ -66,7 +91,13 @@ service cloud.firestore {
         }
 
         match /answerKeys/{answerKeyId} {
-          allow read, write: if isAdmin();
+          allow get: if isAdmin() || (
+            isVerified() &&
+            get(/databases/$(database)/documents/courses/$(courseId)).data.status == 'published' &&
+            get(/databases/$(database)/documents/courses/$(courseId)/lessons/$(lessonId)).data.isPublished == true
+          );
+          allow list: if false;
+          allow write: if isAdmin();
         }
       }
     }
