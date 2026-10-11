@@ -127,3 +127,27 @@ test('students can read and save their own course progress', async () => {
     completedLessons: []
   }));
 });
+
+test('public access is limited to the aggregated geographic statistics document', async () => {
+  await env.withSecurityRulesDisabled(async (context) => {
+    const db = context.firestore();
+    await setDoc(doc(db, 'publicStats/geoSubscribers'), {
+      totalSubscribers: 2,
+      geoOptInSubscribers: 1,
+      countryCounts: [{ code: 'EG', name: 'مصر', subscribers: 1 }]
+    });
+    await setDoc(doc(db, 'users/private-user'), {
+      email: 'private@example.com',
+      location: { country: 'مصر', lat: 30, lng: 31 }
+    });
+  });
+
+  const publicDb = env.unauthenticatedContext().firestore();
+  await assertSucceeds(getDoc(doc(publicDb, 'publicStats/geoSubscribers')));
+  await assertFails(getDocs(collection(publicDb, 'publicStats')));
+  await assertFails(getDoc(doc(publicDb, 'publicStats/other')));
+  await assertFails(getDoc(doc(publicDb, 'users/private-user')));
+  await assertFails(setDoc(doc(publicDb, 'publicStats/geoSubscribers'), {
+    totalSubscribers: 999
+  }));
+});

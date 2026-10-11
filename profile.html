@@ -127,11 +127,12 @@
             <svg class="icon icon-lg" aria-hidden="true"><use href="/assets/icons/sprite.svg#i-map-pin"></use></svg>
             <div style="flex:1;">
               <h3>الموقع الجغرافي</h3>
-              <p class="loc-desc">نحفظ موقعك التقريبي مرة واحدة فقط لغرض إحصائي وتوثيق هوية الطالب.</p>
+              <p class="loc-desc">اختياري: نستخدم إذن الموقع لتحديد الدولة فقط. تُرسل الإحداثيات إلى خدمة OpenStreetMap/Nominatim لتحويلها إلى دولة، ولا نحفظ الإحداثيات الدقيقة.</p>
               <button type="button" class="btn btn-outline btn-sm" id="locBtn">
                 <span class="spinner" aria-hidden="true"></span>
                 تحديد موقعي الآن
               </button>
+              <button type="button" class="btn btn-outline btn-sm" id="removeLocationBtn" hidden>إزالة الدولة المحفوظة</button>
               <p class="loc-status" id="locStatus">لم يتم التحديد بعد.</p>
             </div>
           </div>

@@ -4,7 +4,7 @@
    ============================================================ */
 
 /**
- * يطلب موقع المستخدم ويعيد { lat, lng, accuracy, city, country }
+ * يطلب موقع المستخدم بموافقته ويحفظ الدولة فقط لأغراض الإحصاء.
  * أو يرفض بخطأ رسالته من GEO_MESSAGES
  */
 export function requestLocation({ timeout = 12000 } = {}) {
@@ -14,20 +14,17 @@ export function requestLocation({ timeout = 12000 } = {}) {
     }
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-        let place = { country: null, city: null };
+        const { latitude: lat, longitude: lng } = pos.coords;
+        let place = { country: null, countryCode: null };
         try { place = await reverseGeocode(lat, lng); } catch { /* اختياري */ }
         resolve({
-          lat: +lat.toFixed(6),
-          lng: +lng.toFixed(6),
-          accuracy: Math.round(accuracy),
-          city: place.city,
+          countryCode: place.countryCode,
           country: place.country,
           timestamp: Date.now()
         });
       },
       (err) => reject(Object.assign(new Error(err.code === 1 ? 'PERMISSION_DENIED' : err.code === 2 ? 'POSITION_UNAVAILABLE' : 'TIMEOUT'))),
-      { enableHighAccuracy: true, timeout, maximumAge: 0 }
+      { enableHighAccuracy: false, timeout, maximumAge: 0 }
     );
   });
 }
@@ -39,7 +36,11 @@ async function reverseGeocode(lat, lng) {
   if (!res.ok) throw new Error('GEOCODE_FAIL');
   const data = res.json ? await res.json() : {};
   const a = data.address || {};
-  return { country: a.country || null, city: a.city || a.town || a.village || a.state || null };
+  const countryCode = String(a.country_code || '').toUpperCase();
+  return {
+    country: a.country || null,
+    countryCode: /^[A-Z]{2}$/.test(countryCode) ? countryCode : null
+  };
 }
 
 export const GEO_MESSAGES = {

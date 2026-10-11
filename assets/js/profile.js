@@ -22,7 +22,14 @@ function main({ user, profile }) {
 
   const wasCompleted = !!profile?.profileCompleted;
   let photoBase64 = profile?.photoBase64 || null;   /* الصورة المرفوعة */
-  let locData = profile?.location || null;
+  let locData = profile?.location
+    ? {
+        countryCode: profile.location.countryCode || null,
+        country: profile.location.country || null,
+        timestamp: profile.location.timestamp || null
+      }
+    : null;
+  let removeLocation = false;
   const googlePhoto = profile?.photoURL || user.photoURL || null;
 
   /* ============ أكواد الدول ============ */
@@ -60,7 +67,8 @@ function main({ user, profile }) {
   else if (googlePhoto) preview.src = googlePhoto;
 
   if (profile?.location) {
-    setLocState('ok', `محفوظ: ${[profile.location.city, profile.location.country].filter(Boolean).join('، ') || 'إحداثياتك السابقة'}`);
+    setLocState('ok', `محفوظ: ${profile.location.country || 'الدولة غير متاحة'}`);
+    $('#removeLocationBtn').hidden = false;
   }
 
   /* ============ الصورة: ضغط وتحجيم تلقائي ============ */
@@ -121,14 +129,22 @@ function main({ user, profile }) {
     setLocState('loading', 'جارٍ تحديد موقعك — وافق على إذن المتصفح...');
     try {
       locData = await requestLocation();
-      const place = [locData.city, locData.country].filter(Boolean).join('، ');
-      setLocState('ok', `✔ تم بنجاح: ${place || `إحداثيات ${locData.lat}, ${locData.lng}`} (دقة ±${locData.accuracy}م)`);
+      removeLocation = false;
+      $('#removeLocationBtn').hidden = false;
+      setLocState('ok', `✔ تم تحديد الدولة: ${locData.country || 'لم نتمكن من تحديد الدولة'}`);
     } catch (err) {
       locData = null;
       setLocState('err', GEO_MESSAGES[err.message] || GEO_MESSAGES.UNKNOWN);
     } finally {
       btn.classList.remove('loading'); btn.disabled = false;
     }
+  });
+
+  $('#removeLocationBtn').addEventListener('click', () => {
+    locData = null;
+    removeLocation = true;
+    $('#removeLocationBtn').hidden = true;
+    setLocState('', 'لن تُستخدم الدولة في الإحصاءات بعد حفظ التغييرات.');
   });
 
   /* ============ الحفظ ============ */
@@ -168,6 +184,7 @@ function main({ user, profile }) {
       };
       if (photoBase64) payload.photoBase64 = photoBase64;
       if (locData) payload.location = locData;
+      else if (removeLocation) payload.location = null;
 
       await setDoc(doc(db, 'users', user.uid), payload, { merge: true });
 

@@ -1,6 +1,8 @@
 const { initializeApp } = require('firebase-admin/app');
-const { FieldValue, getFirestore } = require('firebase-admin/firestore');
+const { FieldPath, FieldValue, getFirestore } = require('firebase-admin/firestore');
 const { HttpsError, onCall } = require('firebase-functions/v2/https');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { createSubscriberGeoAggregator } = require('./geo-stats');
 
 initializeApp();
 const db = getFirestore();
@@ -95,4 +97,31 @@ exports.submitLessonQuiz = onCall({
     console.error('submitLessonQuiz failed', { uid, courseId, lessonId, error });
     throw new HttpsError('internal', 'تعذر تصحيح الاختبار بسبب خطأ داخلي.');
   }
+});
+
+exports.refreshSubscriberGeoStats = onSchedule({
+  region: 'us-central1',
+  schedule: 'every 6 hours',
+  timeZone: 'UTC'
+}, async () => {
+  const aggregator = createSubscriberGeoAggregator();
+  let lastUser = null;
+
+  while (true) {
+    let page = db.collection('users')
+      .select('location.countryCode', 'location.country')
+      .orderBy(FieldPath.documentId())
+      .limit(500);
+    if (lastUser) page = page.startAfter(lastUser);
+
+    const snapshot = await page.get();
+    snapshot.docs.forEach((user) => aggregator.add(user.data()));
+    if (snapshot.empty || snapshot.size < 500) break;
+    lastUser = snapshot.docs[snapshot.docs.length - 1];
+  }
+
+  await db.doc('publicStats/geoSubscribers').set({
+    ...aggregator.summary(),
+    updatedAt: FieldValue.serverTimestamp()
+  });
 });
