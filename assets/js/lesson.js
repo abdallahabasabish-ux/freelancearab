@@ -3,13 +3,13 @@
    مشغل يوتيوب (IFrame API) + ملاحظات زمنية + تقدم + نقاط
    ============================================================ */
 
-import { db, functions } from './firebase-config.js';
-import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+import { db } from './firebase-config.js';
 import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { requireAuth, initHeaderAuth } from './auth.js';
 import { fetchCourseById, escapeHtml, formatDuration, getYoutubeId, safeLinkUrl } from './courses-data.js';
 import { fetchProgress, saveLastLesson, toggleLessonComplete, POINTS_PER_LESSON } from './progress.js';
 import { listenLessonNotes, addNote, updateNoteText, deleteNote } from './notes.js';
+import { quizSubmitEndpoint } from './quiz-api-config.js';
 
 const $ = (s) => document.querySelector(s);
 const toast = (m, t) => window.AFA?.toast(m, t);
@@ -291,15 +291,33 @@ function renderLessonQuiz(quiz, previousAttempt) {
       form.querySelectorAll('input[type="radio"]:checked')
     ).map((input) => [input.dataset.questionId, input.value]));
     if (Object.keys(answers).length !== quiz.questions.length)
-      return showQuizMessage('أجب عن الأسئلة الخمسة قبل التسليم.', true);
+      return showQuizMessage('أجب عن الأسئلة الأربعة قبل التسليم.', true);
 
     const button = $('#submitLessonQuiz');
     button.disabled = true;
     button.classList.add('loading');
     try {
-      const submit = httpsCallable(functions, 'submitLessonQuiz');
-      const response = await submit({ courseId: S.course.id, lessonId: S.lessonId, answers });
-      showQuizResult(response.data);
+      if (!quizSubmitEndpoint) {
+        throw Object.assign(new Error('خدمة تصحيح الاختبارات غير مهيأة.'), {
+          code: 'functions/unavailable'
+        });
+      }
+      const idToken = await S.user.getIdToken();
+      const response = await fetch(quizSubmitEndpoint, {
+        method: 'POST',
+        headers: {
+          authorization: `Bearer ${idToken}`,
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({ courseId: S.course.id, lessonId: S.lessonId, answers })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        throw Object.assign(new Error(result.message || 'تعذر تصحيح الاختبار.'), {
+          code: `functions/${result.code || 'internal'}`
+        });
+      }
+      showQuizResult(result);
     } catch (err) {
       if (err.code === 'functions/already-exists') {
         try {

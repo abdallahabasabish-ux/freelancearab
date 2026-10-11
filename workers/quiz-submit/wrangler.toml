@@ -1,0 +1,8 @@
+name = "freelancearab-quiz-submit"
+main = "src/index.mjs"
+compatibility_date = "2026-10-11"
+workers_dev = true
+
+[vars]
+FIREBASE_PROJECT_ID = "freelance-arab"
+ALLOWED_ORIGINS = "https://courses.freelancearab.com"

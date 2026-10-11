@@ -8,21 +8,25 @@
 
 ## النشر
 
-1. فعّل خطة Firebase Blaze لمشروع `freelance-arab`.
-2. ثبّت Firebase CLI وسجّل الدخول:
+1. اتبع خطوات إعداد Cloudflare Worker وحساب الخدمة في [QUIZ_WORKER_SETUP.md](./QUIZ_WORKER_SETUP.md). هذا المسار لا يتطلب نشر Firebase Cloud Functions أو ترقية Firebase إلى Blaze.
+2. شغّل اختبارات Worker قبل النشر:
 
    ```sh
-   npm install -g firebase-tools
-   firebase login
+   cd workers/quiz-submit
+   npm ci
+   npm test
+   npx wrangler login
+   npx wrangler secret put FIREBASE_SERVICE_ACCOUNT
+   npx wrangler deploy
    ```
 
-3. ثبّت اعتماديات الدالة وانشرها مع قواعد Firestore:
+3. انسخ عنوان `workers.dev` الناتج إلى `assets/js/quiz-api-config.js`:
 
-   ```sh
-   npm --prefix functions install
-   firebase deploy --only functions,firestore:rules --project freelance-arab
+   ```js
+   export const quizSubmitEndpoint =
+     'https://freelancearab-quiz-submit.<account-subdomain>.workers.dev/submitLessonQuiz';
    ```
 
-4. ينشر GitHub Pages واجهات الإدارة والطالب من الفرع `main` عند رفع التغييرات.
+4. ارفع تحديث الموقع. بعد نشر الواجهة، جرّب إرسال اختبار بحساب موثّق وتأكد من حفظ محاولة واحدة فقط في `users/{uid}/quizAttempts/{courseId}__{lessonId}`.
 
-لا تظهر الاختبارات للطلاب قبل نشر الدالة والقواعد. لا تنشئ مستندات المحاولات يدوياً؛ دالة `submitLessonQuiz` تنشئها ذرياً وتمنع إعادة المحاولة.
+لا تظهر الاختبارات للطلاب قبل تفعيل Worker وضبط عنوانه في الواجهة. لا تنشئ مستندات المحاولات يدوياً؛ Worker يصحح الإجابات على الخادم وينشئ المحاولة ذرياً ويمنع إعادتها.
